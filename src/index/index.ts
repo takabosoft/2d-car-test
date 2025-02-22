@@ -3,6 +3,7 @@
  * Development Server: npx live-server docs
  * Development Server(HTTPS): npx live-server docs --https=ssl/https.js
  * Release Build: npx webpack --mode=production
+ * URL: http://localhost:8080/
  */
 
 import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from 'planck/with-testbed';

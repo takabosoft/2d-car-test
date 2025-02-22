@@ -7,7 +7,8 @@ module.exports = (env, argv) => {
     return {
         mode: isProduction ? "production" : "development",
         entry: {
-            index: "./src/index.ts",
+            index: "./src/index/index.ts",
+            course_tool: "./src/course_tool/course_tool.ts",
         },
         output: {
             filename: "[name].bundle.js",

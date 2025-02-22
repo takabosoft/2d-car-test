@@ -1,5 +1,5 @@
 node_modules
 package-lock.json
 ssl
-docs/index.bundle.js
+*.bundle.js
 *.css
