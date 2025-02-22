@@ -5,7 +5,7 @@
  * Release Build: npx webpack --mode=production
  */
 
-import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint } from 'planck/with-testbed';
+import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from 'planck/with-testbed';
 
 /**
  * タイヤクラス
@@ -42,7 +42,7 @@ class Tire {
             // 摩擦係数
             friction: 0.0,
             // 跳ね返り
-            restitution: 0.0,
+            restitution: 0.8,
             //userData
         });
     }
@@ -161,7 +161,8 @@ class Car {
     constructor(world: World, readonly controlState: ControlState) {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
-            angularDamping: 3, // 回転摩擦
+            angularDamping: 6, // 回転摩擦
+            
         });
 
         const shape = new PolygonShape([
@@ -178,6 +179,7 @@ class Car {
         this.body.createFixture({
             shape: shape,
             density: 0.1,
+            restitution: 0.8,
         });
 
         const appendTire = (x: number, y: number, maxDriveForce: number, maxLateralImpulse: number,) => {
@@ -199,10 +201,10 @@ class Car {
         };
 
         const frontTireMaxDriveForce = 500;
-        const frontTireMaxLateralImpulse = 9.5;
+        const frontTireMaxLateralImpulse = 17.5; // 横滑り、旋回能力に影響
 
         const backTireMaxDriveForce = 300;
-        const backTireMaxLateralImpulse = 9.5;
+        const backTireMaxLateralImpulse = 19.5;
 
         this.flJoint = appendTire(-3, 8.5, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
         this.frJoint = appendTire(+3, 8.5, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
@@ -218,7 +220,7 @@ class Car {
         // 回転ジョインとの下限上限を使って強制的に変更します。
 
         //control steering
-        const lockAngle = 35 * DEGTORAD;
+        const lockAngle = 40 * DEGTORAD;
         const turnSpeedPerSec = 160 * DEGTORAD;//from lock to lock in 0.5 sec
         const turnPerTimeStep = turnSpeedPerSec / 60.0;
 
@@ -234,8 +236,8 @@ class Car {
         angleToTurn = clamp(angleToTurn, -turnPerTimeStep, turnPerTimeStep);
 
         const newAngle = angleNow + angleToTurn;
-        this.flJoint.setLimits(newAngle, newAngle);
-        this.frJoint.setLimits(newAngle, newAngle);
+        this.flJoint.setLimits(desiredAngle, desiredAngle);
+        this.frJoint.setLimits(desiredAngle, desiredAngle);
     }
 
     /** 位置と角度を初期化します。 */
@@ -263,7 +265,7 @@ $(() => {
     // Call the body factory which allocates memory for the ground body
     // from a pool and creates the ground box shape (also from a pool).
     // The body is also added to the world.
-    const groundBody = world.createBody({
+    /*const groundBody = world.createBody({
         position: new Vec2(0, -10),
     });
 
@@ -272,7 +274,19 @@ $(() => {
         shape: new Box(20.0, 1.0),
         density: 0.0,
         friction: 0.9,
-    });
+    });*/
+
+    //const boundaryBody = world.createBody();
+
+    const boundaryChain = world.createBody();
+    boundaryChain.createFixture(new Chain([
+        new Vec2(-10, -5), // 左下
+        new Vec2( 0, -6),
+        new Vec2(10, -5),
+        new Vec2(10, 5),
+        new Vec2(-10, 5),
+        new Vec2(-10, -5),
+    ].map(v => v.mul(15))), { friction: 1.0 });
 
     const testPlayer = new TestPlayer();
 
@@ -282,6 +296,11 @@ $(() => {
     car.reset(new Vec2(0, 0), Math.PI / 2);
 
     const testbed = Testbed.mount();
+    testbed.x = 0;
+    testbed.y = 0;
+    testbed.width = 300;
+    testbed.height = 300;
+
     testbed.start(world);
     testbed.keydown = (keyCode, label) => {
         //console.log(keyCode);
@@ -292,6 +311,7 @@ $(() => {
         if (label == " ") {
             console.log("TEST");
             car.reset(new Vec2(0, 10), Math.PI / 2);
+            world.clearForces();
         }
     };
     testbed.keyup = (keyCode, label) => {
