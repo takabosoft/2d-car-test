@@ -5,7 +5,7 @@
  * Release Build: npx webpack --mode=production
  */
 
-import { World, Testbed, Box, Vec2, Body } from 'planck/with-testbed';
+import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint } from 'planck/with-testbed';
 
 /**
  * タイヤクラス
@@ -13,29 +13,35 @@ import { World, Testbed, Box, Vec2, Body } from 'planck/with-testbed';
  */
 class Tire {
     readonly body: Body;
-    private readonly maxForwardSpeed = 100;
-    private readonly maxBackwardSpeed = -20;
-    private readonly maxDriveForce = 150;
+    private readonly maxForwardSpeed = 250;
+    private readonly maxBackwardSpeed = -40;
 
-    constructor(world: World, readonly controlState: ControlState) {
+    /**
+     * 
+     * @param world 
+     * @param maxDriveForce 
+     * @param maxLateralImpulse 横滑り打ち消し力上限　小さいとすべる
+     */
+    constructor(
+        world: World, 
+        private readonly maxDriveForce: number, 
+        private readonly maxLateralImpulse: number,
+    )  {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
-            angle: Math.PI / 5,
-            // 線形減衰
-            //linearDamping: 1.5,
-            // 角速度減衰
-            //angularDamping: 1
+            //angle: Math.PI / 5,
         });
 
         this.body.createFixture({
             // 形状
             shape: new Box(0.5, 1.25),
-            // 密度 大きと重い
+            // 密度 大きいと重い
             density: 1.0,
             // 摩擦係数
             friction: 0.0,
             // 跳ね返り
             restitution: 0.0,
+            //userData
         });
     }
 
@@ -53,15 +59,14 @@ class Tire {
         return Vec2.mul(velocity, currentForwardNormal);
     }
 
-    private updateFriction() {
-        const maxLateralImpulse = 2.5; // 小さくするとすべる
-
+    /** 摩擦処理 */
+    updateFriction() {
         // 横方向を打ち消す
         let impulse = this.lateralVelocity.neg().mul(this.body.getMass());
 
         // 横方向の打ち消す力に上限を設けることで横滑りとなる
-        if (impulse.length() > maxLateralImpulse) {
-            impulse = Vec2.mul(maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
+        if (impulse.length() > this.maxLateralImpulse) {
+            impulse = Vec2.mul(this.maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
         }
         this.body.applyLinearImpulse(impulse, this.body.getWorldCenter());
 
@@ -75,13 +80,13 @@ class Tire {
         this.body.applyForce(Vec2.mul(currentForwardNormal, dragForceMagnitude), this.body.getWorldCenter());
     }
 
-
-    private updateDrive() {
+    /** 前進・後退 */
+    updateDrive(controlState: ControlState) {
         //find desired speed
         let desiredSpeed = 0;
-        if (this.controlState.accel) {
+        if (controlState.accel) {
             desiredSpeed = this.maxForwardSpeed;
-        } else if (this.controlState.back) {
+        } else if (controlState.back) {
             desiredSpeed = this.maxBackwardSpeed;
         }
 
@@ -102,21 +107,21 @@ class Tire {
     }
 
     /** 旋回（トルクを加える） */
-    private updateTurn() {
+    /*updateTurn(controlState: ControlState) {
         let desiredTorque = 0;
-        if (this.controlState.left) {
+        if (controlState.left) {
             desiredTorque = 15;
-        } else if (this.controlState.right) {
+        } else if (controlState.right) {
             desiredTorque = -15;
         }
         this.body.applyTorque(desiredTorque);
-    }
+    }*/
 
-    update(): void {
+    /*update(): void {
         this.updateFriction();
         this.updateDrive();
         this.updateTurn();
-    }
+    }*/
 
 }
 
@@ -149,6 +154,98 @@ class TestPlayer {
     }
 }
 
+const DEGTORAD = 0.0174532925199432957;
+const RADTODEG = 57.295779513082320876;
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(value, max));
+}
+
+
+class Car {
+    readonly body: Body;
+    private tires: Tire[] = [];
+    private flJoint: RevoluteJoint;
+    private frJoint: RevoluteJoint;
+
+    constructor(world: World, readonly controlState: ControlState) {
+        this.body = world.createDynamicBody({
+            position: new Vec2(0, 0),
+            angularDamping: 3, // 回転摩擦
+        });
+
+        const shape = new PolygonShape([
+            new Vec2(1.5, 0),
+            new Vec2(3, 2.5),
+            new Vec2(2.8, 5.5),
+            new Vec2(1, 10),
+            new Vec2(-1, 10),
+            new Vec2(-2.8, 5.5),
+            new Vec2(-3, 2.5),
+            new Vec2(-1.5, 0)
+        ]);
+
+        this.body.createFixture({
+            shape: shape,
+            density: 0.1,
+        });
+
+        const appendTire = (x: number, y: number, maxDriveForce: number, maxLateralImpulse: number,) => {
+            const tire = new Tire(world, maxDriveForce, maxLateralImpulse); // dummy state
+            const def = new RevoluteJoint({
+                bodyA: this.body,
+                enableLimit: true,
+                lowerAngle: 0,
+                upperAngle: 0,
+                bodyB: tire.body,
+                localAnchorA: new Vec2(x, y),
+                localAnchorB: new Vec2(0, 0),
+            });
+            this.tires.push(tire);
+            return world.createJoint(def)!;
+        };
+
+        const frontTireMaxDriveForce = 500;
+        const frontTireMaxLateralImpulse = 9.5;
+
+        const backTireMaxDriveForce = 300;
+        const backTireMaxLateralImpulse = 9.5;
+
+        this.flJoint = appendTire(-3, 8.5, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
+        this.frJoint = appendTire(+3, 8.5, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
+        appendTire(-3, 0.75, backTireMaxDriveForce, backTireMaxLateralImpulse);
+        appendTire(+3, 0.75, backTireMaxDriveForce, backTireMaxLateralImpulse);
+    }
+
+    update() {
+        this.tires.forEach(t => t.updateFriction());
+        this.tires.forEach(t => t.updateDrive(this.controlState));
+
+        // ハンドル操作による前輪タイヤの方向転換を行います。
+        // 回転ジョインとの下限上限を使って強制的に変更します。
+
+        //control steering
+        const lockAngle = 35 * DEGTORAD;
+        const turnSpeedPerSec = 160 * DEGTORAD;//from lock to lock in 0.5 sec
+        const turnPerTimeStep = turnSpeedPerSec / 60.0;
+
+        let desiredAngle = 0;
+        if (this.controlState.left) {
+            desiredAngle = lockAngle;
+        } else if (this.controlState.right) {
+            desiredAngle = -lockAngle;
+        }
+
+        const angleNow = this.flJoint.getJointAngle();
+        let angleToTurn = desiredAngle - angleNow;
+        angleToTurn = clamp(angleToTurn, -turnPerTimeStep, turnPerTimeStep);
+
+        const newAngle = angleNow + angleToTurn;
+        this.flJoint.setLimits(newAngle, newAngle);
+        this.frJoint.setLimits(newAngle, newAngle);
+    }
+}
+
 $(() => {
     console.log("OK");
 
@@ -157,6 +254,7 @@ $(() => {
         gravity: new Vec2(0, 0),
     });
 
+    /*
     // Call the body factory which allocates memory for the ground body
     // from a pool and creates the ground box shape (also from a pool).
     // The body is also added to the world.
@@ -169,11 +267,23 @@ $(() => {
         shape: new Box(20.0, 1.0),
         density: 0.0,
         friction: 0.9,
-    });
+    });*/
 
     const testPlayer = new TestPlayer();
 
-    const tire = new Tire(world, testPlayer.controlState);
+    //const tire = new Tire(world, testPlayer.controlState);
+
+    const car = new Car(world, testPlayer.controlState);
+
+    //world.step(1);
+    //car.body.setPosition(new Vec2(0, 5));
+    //car.body.setAngle(0);
+    //world.clearForces();
+
+    //car.body.setAngle(Math.PI / 2);
+    //car.body.setLinearVelocity(Vec2.zero());
+    //car.body.setAngularVelocity(0);
+   
 
     const testbed = Testbed.mount();
     testbed.start(world);
@@ -188,7 +298,7 @@ $(() => {
     };
     testbed.step = (deltaTimeMS, totalTimeMS) => {
         //console.log("O?", dt, t)
-        tire.update();
+        car.update();
     };
 })
 
