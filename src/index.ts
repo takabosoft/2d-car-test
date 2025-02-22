@@ -16,6 +16,8 @@ class Tire {
     private readonly maxForwardSpeed = 250;
     private readonly maxBackwardSpeed = -40;
 
+    joint?: RevoluteJoint;
+
     /**
      * 
      * @param world 
@@ -23,10 +25,10 @@ class Tire {
      * @param maxLateralImpulse 横滑り打ち消し力上限　小さいとすべる
      */
     constructor(
-        world: World, 
-        private readonly maxDriveForce: number, 
+        world: World,
+        private readonly maxDriveForce: number,
         private readonly maxLateralImpulse: number,
-    )  {
+    ) {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
             //angle: Math.PI / 5,
@@ -106,23 +108,6 @@ class Tire {
         this.body.applyForce(Vec2.mul(force, currentForwardNormal), this.body.getWorldCenter());
     }
 
-    /** 旋回（トルクを加える） */
-    /*updateTurn(controlState: ControlState) {
-        let desiredTorque = 0;
-        if (controlState.left) {
-            desiredTorque = 15;
-        } else if (controlState.right) {
-            desiredTorque = -15;
-        }
-        this.body.applyTorque(desiredTorque);
-    }*/
-
-    /*update(): void {
-        this.updateFriction();
-        this.updateDrive();
-        this.updateTurn();
-    }*/
-
 }
 
 class ControlState {
@@ -161,6 +146,11 @@ function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(value, max));
 }
 
+function rotateVec2(vec: Vec2, angleRad: number) {
+    return new Vec2(
+        vec.x * Math.cos(angleRad) - vec.y * Math.sin(angleRad),
+        vec.x * Math.sin(angleRad) + vec.y * Math.cos(angleRad));
+}
 
 class Car {
     readonly body: Body;
@@ -192,6 +182,8 @@ class Car {
 
         const appendTire = (x: number, y: number, maxDriveForce: number, maxLateralImpulse: number,) => {
             const tire = new Tire(world, maxDriveForce, maxLateralImpulse); // dummy state
+            this.tires.push(tire);
+
             const def = new RevoluteJoint({
                 bodyA: this.body,
                 enableLimit: true,
@@ -201,8 +193,9 @@ class Car {
                 localAnchorA: new Vec2(x, y),
                 localAnchorB: new Vec2(0, 0),
             });
-            this.tires.push(tire);
-            return world.createJoint(def)!;
+            const joint = world.createJoint(def)!;
+            tire.joint = joint;
+            return joint;
         };
 
         const frontTireMaxDriveForce = 500;
@@ -244,6 +237,18 @@ class Car {
         this.flJoint.setLimits(newAngle, newAngle);
         this.frJoint.setLimits(newAngle, newAngle);
     }
+
+    /** 位置と角度を初期化します。 */
+    reset(pos: Vec2, angleRad: number): void {
+        this.body.setTransform(pos, angleRad);
+
+        this.tires.forEach(t => {
+            const joint = t.joint!;
+            const localAnchorA = joint.getLocalAnchorA();
+            const tirePos = rotateVec2(localAnchorA, angleRad).add(pos);
+            t.body.setTransform(tirePos, angleRad);
+        });
+    }
 }
 
 $(() => {
@@ -254,12 +259,12 @@ $(() => {
         gravity: new Vec2(0, 0),
     });
 
-    /*
+
     // Call the body factory which allocates memory for the ground body
     // from a pool and creates the ground box shape (also from a pool).
     // The body is also added to the world.
     const groundBody = world.createBody({
-        position: new Vec2(0, 10),
+        position: new Vec2(0, -10),
     });
 
     // Add the ground fixture to the ground body.
@@ -267,23 +272,14 @@ $(() => {
         shape: new Box(20.0, 1.0),
         density: 0.0,
         friction: 0.9,
-    });*/
+    });
 
     const testPlayer = new TestPlayer();
 
     //const tire = new Tire(world, testPlayer.controlState);
 
     const car = new Car(world, testPlayer.controlState);
-
-    //world.step(1);
-    //car.body.setPosition(new Vec2(0, 5));
-    //car.body.setAngle(0);
-    //world.clearForces();
-
-    //car.body.setAngle(Math.PI / 2);
-    //car.body.setLinearVelocity(Vec2.zero());
-    //car.body.setAngularVelocity(0);
-   
+    car.reset(new Vec2(0, 0), Math.PI / 2);
 
     const testbed = Testbed.mount();
     testbed.start(world);
@@ -292,13 +288,22 @@ $(() => {
         //const force = new Vec2(0, 5000);  // 上方向に500の力
         //rectBody.applyForce(force, rectBody.getWorldCenter());  // 物体に力を加える*/
         testPlayer.onKeyDown(label);
+
+        if (label == " ") {
+            console.log("TEST");
+            car.reset(new Vec2(0, 10), Math.PI / 2);
+        }
     };
     testbed.keyup = (keyCode, label) => {
         testPlayer.onKeyUp(label);
     };
+
+    let a = 0;
     testbed.step = (deltaTimeMS, totalTimeMS) => {
         //console.log("O?", dt, t)
         car.update();
+        //car.reset(new Vec2(0, 10), a);
+        //a += 0.1;
     };
 })
 
