@@ -1,0 +1,16 @@
+{
+    "liveSassCompile.settings.generateMap": false,
+    "liveSassCompile.settings.autoprefix": [
+        "ios_saf >= 13.4"
+    ],
+    "liveSassCompile.settings.formats": [
+        {
+            "extensionName": ".css",
+            "format": "compressed"
+        }
+    ],
+    "scss.format.spaceAroundSelectorSeparator": true,
+    "cSpell.words": [
+    ],
+    "files.eol": "\n",
+}
