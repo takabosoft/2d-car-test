@@ -9,12 +9,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./index.css?rev=0">
+    <link rel="stylesheet" href="./course_tool.css">
 </head>
 
 <body ontouchstart="">
-    TEST
+    <h1>コースツール</h1>
+
+    <h2>入力：</h2>
+    <input type="file" id="courseFile">
+    <h2>オリジナル：</h2>
+    <img id="img">
+    <h2>SVG変換：</h2>
+    <div id="res"></div>
+    <h2>パス抽出：</h2>
+    <textarea id="textarea"></textarea>
+
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+    <script src="./imagetracer_v1.2.6.js"></script>
     <script src="./course_tool.bundle.js?rev=0"></script>
 </body>
 
