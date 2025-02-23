@@ -30,6 +30,7 @@ export class GameScene extends Scene {
             this.courseCanvas.element.addClass("course-canvas"),
             this.carView.element,
             this.textEl,
+            $(`<div class="operation-info">`).text("[W]アクセル\n[A][D]ハンドル\n[S]ブレーキ\n[X]バック"),
         )
         this.car.reset(this.course.startPos, Math.PI / 2);
 

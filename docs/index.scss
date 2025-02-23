@@ -49,6 +49,21 @@ body {
         font-size: 14px;
         color: white;
     }
+
+    .operation-info {
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 8px;
+        padding: 8px;
+        position: absolute;
+        width: fit-content;
+        font-size: 14px;
+        color: white;
+        left: 4px;
+        bottom: 4px;
+        white-space: break-spaces;
+        word-break: break-word;
+        line-height: 1.5;
+    }
 }
 
 .course-canvas {
