@@ -1,4 +1,4 @@
-import { Edge, Vec2, World } from "planck/with-testbed";
+import { Edge, Vec2, World } from "planck";
 import { FilterCategory } from "../env";
 
 export class CheckPoint {

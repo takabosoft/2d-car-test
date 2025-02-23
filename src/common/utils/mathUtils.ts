@@ -1,4 +1,4 @@
-import { Vec2 } from "planck/with-testbed";
+import { Vec2 } from "planck";
 
 export const degToRad = Math.PI / 180;
 export const radToDeg = 180 / Math.PI;

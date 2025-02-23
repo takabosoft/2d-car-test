@@ -1,10 +1,11 @@
-import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from "planck/with-testbed";
+import { World, Box, Vec2, Body, RevoluteJoint } from "planck";
 import { ControlState } from "./controlState";
 import { FilterCategory, pixelToSim } from "../env";
 
 /**
  * タイヤクラス
  * 参考：https://www.iforce2d.net/b2dtut/top-down-car
+ * ※かなり変えてしまったため、上記サイトの実装例になっていない点にご注意ください。
  */
 export class Tire {
     readonly body: Body;

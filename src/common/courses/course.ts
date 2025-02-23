@@ -1,4 +1,4 @@
-import { Chain, Vec2, World } from "planck/with-testbed";
+import { Chain, Vec2, World } from "planck";
 import { FilterCategory, pixelToSim } from "../env";
 import { CheckPoint } from "./checkPoint";
 

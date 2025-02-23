@@ -1,4 +1,3 @@
-import { Vec2 } from "planck/with-testbed";
 import { Component } from "../components/component";
 
 interface IVec2 {

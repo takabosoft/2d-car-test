@@ -1,4 +1,4 @@
-import { Vec2, World } from "planck/with-testbed";
+import { Vec2, World } from "planck";
 import { Course, TestCourse } from "../../../common/courses/course";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
@@ -22,7 +22,7 @@ export class GameScene extends Scene {
     private readonly carView = new CarView();
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
     private totalSec = 0;
-    private readonly textEl = $(`<div class="text">`);
+    private readonly textEl = $(`<div class="lap-info">`);
 
     constructor(sceneController: SceneController) {
         super(sceneController, "game-scene");
@@ -125,15 +125,35 @@ export class GameScene extends Scene {
             ctx.restore();
         }
 
+        // ゴール
         {
             const checkPoints = this.course.checkPoints;
             if (checkPoints.length > 0) {
-                ctx.beginPath();
-                ctx.moveTo(checkPoints[0][0].x, checkPoints[0][0].y);
-                ctx.lineTo(checkPoints[0][1].x, checkPoints[0][1].y);
-                ctx.strokeStyle = "red";
-                ctx.lineWidth = 0.02;
-                ctx.stroke();
+                ctx.save();
+                ctx.clip(path);
+                const blockSize = 0.04;
+                
+                const drawLine = (xOffset: number) => {
+                    ctx.beginPath();
+                    ctx.moveTo(checkPoints[0][0].x + xOffset, checkPoints[0][0].y);
+                    ctx.lineTo(checkPoints[0][1].x + xOffset, checkPoints[0][1].y);
+                    ctx.stroke();
+                }
+                
+                ctx.strokeStyle = "black";
+                ctx.lineWidth = blockSize * 4;
+                drawLine(0);
+
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = blockSize;
+                ctx.setLineDash([blockSize, blockSize]);
+                drawLine(-blockSize * 1.5);
+                drawLine(+blockSize * 0.5);
+                ctx.lineDashOffset = blockSize;
+                drawLine(-blockSize * 0.5);
+                drawLine(+blockSize * 1.5);
+
+                ctx.restore();
             }
         }
 

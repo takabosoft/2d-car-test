@@ -1,7 +1,7 @@
-import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from "planck/with-testbed";
+import { World, Vec2, Body, PolygonShape, RevoluteJoint } from "planck";
 import { Tire } from "./tire";
 import { ControlState } from "./controlState";
-import { clamp, degToRad, rotateVec2 } from "../utils/mathUtils";
+import { degToRad, rotateVec2 } from "../utils/mathUtils";
 import { FilterCategory, pixelToSim } from "../env";
 
 export class Car {

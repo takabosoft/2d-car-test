@@ -4,7 +4,7 @@
  *   - scene
  */
 
-import { Vec2 } from "planck/with-testbed";
+import { Vec2 } from "planck";
 import { Component } from "../../common/components/component";
 import { Scene } from "./scene";
 
