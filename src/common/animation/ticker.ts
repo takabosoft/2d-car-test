@@ -3,7 +3,7 @@ import { AnimationFrameRequester } from "./animationFrameRequester";
 export class Ticker {
     private readonly req = new AnimationFrameRequester();
 
-    constructor(readonly onFrame: (frameStep: number) => void) {
+    constructor(readonly onFrame: (deltaSec: number) => void) {
 
     }
 
@@ -14,8 +14,8 @@ export class Ticker {
         
         const frame = (timeMS: DOMHighResTimeStamp) => {
             if (lastTimeMS != null) {
-                let frameStep = (timeMS - lastTimeMS) / (1000 / 60);
-                this.onFrame(frameStep);
+                let deltaSec = (timeMS - lastTimeMS) / 1000;
+                this.onFrame(deltaSec);
             }
             lastTimeMS = timeMS;
             this.req.request(frame);

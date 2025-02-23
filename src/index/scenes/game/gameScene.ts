@@ -7,9 +7,9 @@ import { Car } from "../../../common/car/car";
 import { HumanDriver } from "../../../common/drivers/humanDriver";
 import { CarView } from "../../../common/car/carView";
 import { pixelToSim } from "../../../common/env";
-import { degToRad, radToDeg } from "../../../common/utils/mathUtils";
 import { Ticker } from "../../../common/animation/ticker";
 import { spriteInfos, spriteSheet } from "../../../common/spriteSheet";
+import { CheckPoint } from "../../../common/courses/checkPoint";
 
 export class GameScene extends Scene {
     private readonly world = new World({ gravity: new Vec2(0, 0) });
@@ -20,7 +20,8 @@ export class GameScene extends Scene {
     private readonly humanDriver = new HumanDriver();
     private readonly car = new Car(this.world, this.humanDriver.controlState);
     private readonly carView = new CarView();
-    private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep))
+    private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
+    private totalSec = 0;
 
     constructor(sceneController: SceneController) {
         super(sceneController, "game-scene");
@@ -29,6 +30,21 @@ export class GameScene extends Scene {
             this.carView.element,
         )
         this.car.reset(this.course.startPos, Math.PI / 2);
+
+        this.world.on("begin-contact", e => {
+            const aUserData = e.getFixtureA().getUserData();
+            const bUserData = e.getFixtureB().getUserData();
+            if (aUserData instanceof Car) {
+                if (bUserData instanceof CheckPoint) {
+                    aUserData.onCheckPoint(bUserData.index, this.totalSec, this.course.checkPointCount);
+                }
+            } else if (bUserData instanceof Car) {
+                if (aUserData instanceof CheckPoint) {
+                    bUserData.onCheckPoint(aUserData.index, this.totalSec, this.course.checkPointCount);
+                }
+            }
+        });
+
         this.layout();
     }
 
@@ -74,7 +90,6 @@ export class GameScene extends Scene {
         const pixelScale = pixelToSim * mat.a;
         
         this.courseCanvas.size = screenSize;
-        //this.courseCanvas.clear();
 
         const ctx = this.courseCanvas.ctx;
         ctx.imageSmoothingEnabled = false;
@@ -108,23 +123,38 @@ export class GameScene extends Scene {
             ctx.restore();
         }
 
-        ctx.save();
-        ctx.clip(path);
+        {
+            const checkPoints = this.course.checkPoints;
+            if (checkPoints.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(checkPoints[0][0].x, checkPoints[0][0].y);
+                ctx.lineTo(checkPoints[0][1].x, checkPoints[0][1].y);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 0.02;
+                ctx.stroke();
+            }
+        }
 
-        ctx.lineWidth = 0.08;
-        ctx.strokeStyle = "white";
-        ctx.stroke(path);
+        // 縁石
+        {
+            ctx.save();
+            ctx.clip(path);
 
-        ctx.setLineDash([0.08, 0.08]);
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 0.06;
-        ctx.stroke(path);
+            ctx.lineWidth = 0.08;
+            ctx.strokeStyle = "white";
+            ctx.stroke(path);
 
-        ctx.restore();
+            ctx.setLineDash([0.08, 0.08]);
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 0.06;
+            ctx.stroke(path);
+
+            ctx.restore();
+        }
 
         ctx.setLineDash([]);
         ctx.lineWidth = 0.02;
-        ctx.strokeStyle = "rgb(0, 0, 0)";
+        ctx.strokeStyle = "rgb(50, 50, 50)";
         ctx.stroke(path);
 
         this.updateCarView();
@@ -134,10 +164,13 @@ export class GameScene extends Scene {
         this.carView.update(this.car, this.courseMatrix);
     }
 
-    private onTicker(frameStep: number) {
+    private onTicker(deltaSec: number) {
         //console.log(frameStep);
         this.car.update();
-        this.world.step(1 / 60 * frameStep);
+
+        
+        this.totalSec += deltaSec;
+        this.world.step(deltaSec);
         this.updateCarView();
     }
 }

@@ -9,6 +9,10 @@ export class Car {
     private tires: Tire[] = [];
     private flJoint: RevoluteJoint;
     private frJoint: RevoluteJoint;
+    private checkPointHistory: number[] = [];
+    private _startSec?: number;
+    private lapTimes: number[] = [];
+    private _bestLapTime?: number;
 
     constructor(world: World, readonly controlState: ControlState) {
         this.body = world.createDynamicBody({
@@ -31,10 +35,10 @@ export class Car {
         const r = 2;
         const shape = new PolygonShape([
             new Vec2(-4.5, -8 + 0.5), // 左下
-            new Vec2(-4.5, 16 -8 - r - 0.5),
-            new Vec2(-4.5 + r, 16 -8 - 0.5),
-            new Vec2(+4.5 - r, 16 -8 - 0.5),
-            new Vec2(+4.5, 16 - r -8 - 0.5),
+            new Vec2(-4.5, 16 - 8 - r - 0.5),
+            new Vec2(-4.5 + r, 16 - 8 - 0.5),
+            new Vec2(+4.5 - r, 16 - 8 - 0.5),
+            new Vec2(+4.5, 16 - r - 8 - 0.5),
             new Vec2(+4.5, -8 + 0.5),
         ].map(s => s.mul(pixelToSim)));
 
@@ -47,11 +51,13 @@ export class Car {
             restitution: 0.8,
             filterCategoryBits: FilterCategory.Car,
             filterMaskBits: FilterCategory.Wall,
+            userData: this,
         });
 
         const appendTire = (x: number, y: number, forwardDriveForce: number, backwardDriveForce: number/*, maxLateralImpulse: number*/) => {
             const tire = new Tire(world, maxForwardSpeed, maxBackwardSpeed, forwardDriveForce, backwardDriveForce/*, maxLateralImpulse*/); // dummy state
             this.tires.push(tire);
+            tire.body.setUserData(this);
 
             const def = new RevoluteJoint({
                 bodyA: this.body,
@@ -72,7 +78,7 @@ export class Car {
         appendTire(-5.5, 4.5 - 1 - 8, backTireForwardDriveForce, backTireBackwardDriveForce);
         appendTire(+5.5, 4.5 - 1 - 8, backTireForwardDriveForce, backTireBackwardDriveForce);
     }
-    
+
     get getTireAngle() { return this.flJoint.getLowerLimit(); }
 
     update() {
@@ -103,5 +109,29 @@ export class Car {
             t.body.setLinearVelocity(Vec2.zero());
             t.body.setAngularVelocity(0);
         });
+    }
+
+    onCheckPoint(idx: number, totalSec: number, checkPointCount: number) {
+        if (idx == 0) {
+            if (this.checkPointHistory.length == checkPointCount && this._startSec != null) {
+                if (this.checkPointHistory.every((i, idx) => i == idx)) {
+                    const lapTime = totalSec - this._startSec;
+                    if (this._bestLapTime == null || this._bestLapTime > lapTime) {
+                        this._bestLapTime = lapTime;
+                    }
+                    console.log(lapTime);
+                    this.lapTimes.push(lapTime);
+                }
+            }
+            this.checkPointHistory = [0];
+            this._startSec = totalSec;
+        } else {
+            if (this.checkPointHistory[this.checkPointHistory.length - 1] == idx) {
+                this.checkPointHistory.pop();
+            } else {
+                this.checkPointHistory.push(idx);
+            }
+        }
+        //console.log(JSON.stringify(this.checkPointHistory));
     }
 }

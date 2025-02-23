@@ -40,7 +40,7 @@ export class Tire {
             friction: 0.0,
             // 跳ね返り
             restitution: 0.8,
-            //userData
+            
             filterCategoryBits: FilterCategory.Car,
             filterMaskBits: FilterCategory.Wall,
         });
