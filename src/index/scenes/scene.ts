@@ -21,4 +21,7 @@ export class Scene extends Component {
     onResize(): void {
 
     }
+
+    onKeyDown(e: KeyboardEvent) {}
+    onKeyUp(e: KeyboardEvent) {}
 }

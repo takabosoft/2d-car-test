@@ -34,7 +34,30 @@ body {
 }
 
 .game-scene {
-    .course-canvas {
-        
+    
+}
+
+.course-canvas {
+    position: absolute;
+}
+
+.car {
+    position: absolute;
+    will-change: transform;
+    transform-origin: 0 0;
+    width: 13px;
+    height: 16px;
+    left: 0;
+    top: 0;
+    //image-rendering: pixelated;
+    filter: drop-shadow(0 0 2px black);
+
+    > .tire {
+        position: absolute;
+        will-change: transform;
+    }
+
+    > .body {
+        position: absolute;
     }
 }

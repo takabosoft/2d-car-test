@@ -17,6 +17,17 @@ export class SceneController extends Component {
 
         const observer = new ResizeObserver(() => this._curScene?.onResize());
         observer.observe(this.element[0]);
+
+        window.addEventListener("keydown", e => {
+            if (e.target instanceof HTMLButtonElement && (e.key == "Enter" || e.key == " ")) {
+                e.preventDefault();
+            }
+            this._curScene?.onKeyDown(e);
+        }, true);
+
+        window.addEventListener("keyup", e => {
+            this._curScene?.onKeyUp(e);
+        }, true);
     }
 
     get screenSize(): Vec2 { return new Vec2(this.element.outerWidth()!, this.element.outerHeight()!); }

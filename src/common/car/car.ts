@@ -28,13 +28,14 @@ export class Car {
         const backTireBackwardDriveForce = 0.01;
         //const backTireMaxLateralImpulse = 40 * 300;
 
+        const r = 2;
         const shape = new PolygonShape([
-            new Vec2(-4.5, -8),
-            new Vec2(-4.5, 16 -8 - 2),
-            new Vec2(-4.5 + 2, 16 -8 ),
-            new Vec2(+4.5 - 2, 16 -8),
-            new Vec2(+4.5, 16 - 2 -8),
-            new Vec2(+4.5, 0 -8),
+            new Vec2(-4.5, -8 + 0.5), // 左下
+            new Vec2(-4.5, 16 -8 - r - 0.5),
+            new Vec2(-4.5 + r, 16 -8 - 0.5),
+            new Vec2(+4.5 - r, 16 -8 - 0.5),
+            new Vec2(+4.5, 16 - r -8 - 0.5),
+            new Vec2(+4.5, -8 + 0.5),
         ].map(s => s.mul(pixelToSim)));
 
         this.body.createFixture({

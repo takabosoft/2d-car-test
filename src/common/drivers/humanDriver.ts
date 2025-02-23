@@ -5,30 +5,31 @@ export class HumanDriver {
     private readonly keyState = new Set<string>();
 
     private get calcSteeringRatio() {
-        return 0 + (this.keyState.has("A") ? -1 : 0) + (this.keyState.has("D") ? +1 : 0);
+        return 0 + (this.keyState.has("a") ? -1 : 0) + (this.keyState.has("d") ? +1 : 0);
     }
 
-    onKeyDown(key: string): void {
-        switch (key) {
-            case "W": this.controlState.accel = true; break;
-            case "S": this.controlState.brake = true; break;
-            case "X": this.controlState.back = true; break;
-            case "A":
-            case "D":
-                this.keyState.add(key);
+    onKeyDown(e: KeyboardEvent): void {
+        console.log(e.key);
+        switch (e.key) {
+            case "w": this.controlState.accel = true; break;
+            case "s": this.controlState.brake = true; break;
+            case "x": this.controlState.back = true; break;
+            case "a":
+            case "d":
+                this.keyState.add(e.key);
                 this.controlState.steeringRatio = this.calcSteeringRatio;
                 break;
         }
     }
 
-    onKeyUp(key: string): void {
-        switch (key) {
-            case "W": this.controlState.accel = false; break;
-            case "S": this.controlState.brake = false; break;
-            case "X": this.controlState.back = false; break;
-            case "A":
-            case "D":
-                this.keyState.delete(key);
+    onKeyUp(e: KeyboardEvent): void {
+        switch (e.key) {
+            case "w": this.controlState.accel = false; break;
+            case "s": this.controlState.brake = false; break;
+            case "x": this.controlState.back = false; break;
+            case "a":
+            case "d":
+                this.keyState.delete(e.key);
                 this.controlState.steeringRatio = this.calcSteeringRatio;
                 break;
         }

@@ -3,6 +3,12 @@ import { Course, TestCourse } from "../../../common/courses/course";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
 import { TinyCanvas } from "../../../common/utils/tinyCanvas";
+import { Car } from "../../../common/car/car";
+import { HumanDriver } from "../../../common/drivers/humanDriver";
+import { CarView } from "../../../common/car/carView";
+import { pixelToSim } from "../../../common/env";
+import { degToRad, radToDeg } from "../../../common/utils/mathUtils";
+import { Ticker } from "../../../common/animation/ticker";
 
 export class GameScene extends Scene {
     private readonly world = new World({ gravity: new Vec2(0, 0) });
@@ -10,25 +16,39 @@ export class GameScene extends Scene {
     private _lastScreenSize = Vec2.zero();
     private readonly courseCanvas = new TinyCanvas();
     private courseMatrix = new DOMMatrix();
+    private readonly humanDriver = new HumanDriver();
+    private readonly car = new Car(this.world, this.humanDriver.controlState);
+    private readonly carView = new CarView();
+    private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep))
 
     constructor(sceneController: SceneController) {
         super(sceneController, "game-scene");
         this.element.append(
             this.courseCanvas.element.addClass("course-canvas"),
+            this.carView.element,
         )
+        this.car.reset(this.course.startPos, Math.PI / 2);
         this.layout();
     }
 
     override onStartScene(): void {
-        console.log("start");
+        this.ticker.start();
     }
 
     override onEndScene(): void {
-        
+        this.ticker.stop();
     }
 
     override onResize(): void {
         this.layout();
+    }
+
+    override onKeyDown(e: KeyboardEvent): void {
+        this.humanDriver.onKeyDown(e);
+    }
+
+    override onKeyUp(e: KeyboardEvent): void {
+        this.humanDriver.onKeyUp(e);
     }
 
     private layout() {
@@ -40,7 +60,7 @@ export class GameScene extends Scene {
         const scale = Math.min(screenSize.x / courseSize.x, screenSize.y / courseSize.y);
         const scaledSize = Vec2.mul(courseSize, scale);
         const offset = Vec2.mul(0.5, Vec2.sub(screenSize, scaledSize));
-        console.log(scaledSize, offset);
+        //console.log(scaledSize, offset);
         
         // コース→画面の変換行列を作っておきます。
         const mat = new DOMMatrix();
@@ -87,5 +107,28 @@ export class GameScene extends Scene {
         ctx.lineWidth = 0.02;
         ctx.strokeStyle = "rgb(0, 0, 0)";
         ctx.stroke(path);
+
+        this.updateCarView();
+    }
+
+    private updateCarView() {
+        const mat = new DOMMatrix();
+        mat.multiplySelf(this.courseMatrix);
+        const pos = this.car.body.getPosition();
+        mat.translateSelf(pos.x, pos.y);
+        
+        mat.scaleSelf(pixelToSim, pixelToSim, 1);
+
+        mat.rotateSelf(0, 0, this.car.body.getAngle() * radToDeg);
+        mat.scaleSelf(1, -1, 1);
+        mat.translateSelf(-13 / 2, -16 / 2, 0);
+        this.carView.element[0].style.transform = mat.toString();
+    }
+
+    private onTicker(frameStep: number) {
+        //console.log(frameStep);
+        this.car.update();
+        this.world.step(1 / 60 * frameStep);
+        this.updateCarView();
     }
 }

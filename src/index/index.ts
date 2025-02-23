@@ -12,6 +12,7 @@ import { ControlState } from "../common/car/controlState";
 import { TestCourse } from "../common/courses/course";
 import { SceneController } from "./scenes/sceneController";
 import { GameScene } from "./scenes/game/gameScene";
+import { spriteSheet } from "../common/spriteSheet";
 
 
 
@@ -66,8 +67,9 @@ $(() => new PageController().start());
 class PageController {
     readonly sceneController = new SceneController();
 
-    start() {
+    async start() {
         $(document.body).append(this.sceneController.element);
+        await spriteSheet.load();
         this.sceneController.changeScene(new GameScene(this.sceneController));
     }
 }

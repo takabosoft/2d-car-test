@@ -1,8 +1,13 @@
 import { Vec2 } from "planck/with-testbed";
 import { Component } from "../components/component";
 
+interface IVec2 {
+    readonly x: number;
+    readonly y: number;
+}
+
 export class TinyCanvas extends Component {
-    private readonly canvas: HTMLCanvasElement;
+    readonly canvas: HTMLCanvasElement;
     readonly ctx: CanvasRenderingContext2D;
     
     constructor() {
@@ -12,7 +17,7 @@ export class TinyCanvas extends Component {
         this.ctx = this.canvas.getContext("2d")!;
     }
 
-    set size(s: Vec2) {
+    set size(s: IVec2) {
         this.canvas.width = s.x;
         this.canvas.height = s.y;
 
