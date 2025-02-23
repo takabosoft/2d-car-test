@@ -1,53 +1,31 @@
-import { Vec2, World } from "planck";
-import { Course, TestCourse } from "../../../common/courses/course";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
-import { TinyCanvas } from "../../../common/utils/tinyCanvas";
 import { Car } from "../../../common/car/car";
 import { HumanDriver } from "../../../common/drivers/humanDriver";
 import { CarView } from "../../../common/car/carView";
-import { pixelToSim } from "../../../common/env";
 import { Ticker } from "../../../common/animation/ticker";
-import { spriteInfos, spriteSheet } from "../../../common/spriteSheet";
-import { CheckPoint } from "../../../common/courses/checkPoint";
+import { CourseView } from "../../../common/courses/courseView";
+import { GameWorld } from "../../../common/gameWorld";
+import { formatLapTime } from "../../../common/utils/lapTimeFormatter";
 
 export class GameScene extends Scene {
-    private readonly world = new World({ gravity: new Vec2(0, 0) });
-    private readonly course: Course = new TestCourse(this.world);
-    private _lastScreenSize = Vec2.zero();
-    private readonly courseCanvas = new TinyCanvas();
-    private courseMatrix = new DOMMatrix();
+    private readonly gameWorld = new GameWorld()
+    private readonly courseView = new CourseView();
     private readonly humanDriver = new HumanDriver();
-    private readonly car = new Car(this.world, this.humanDriver.controlState);
+    private readonly car = new Car(this.gameWorld.world, this.humanDriver.controlState);
     private readonly carView = new CarView();
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
-    private totalSec = 0;
     private readonly textEl = $(`<div class="lap-info">`);
 
     constructor(sceneController: SceneController) {
         super(sceneController, "game-scene");
         this.element.append(
-            this.courseCanvas.element.addClass("course-canvas"),
+            this.courseView.element,
             this.carView.element,
             this.textEl,
             $(`<div class="operation-info">`).text("[W]アクセル\n[A][D]ハンドル\n[S]ブレーキ\n[X]バック"),
         )
-        this.car.reset(this.course.startPos, Math.PI / 2);
-
-        this.world.on("begin-contact", e => {
-            const aUserData = e.getFixtureA().getUserData();
-            const bUserData = e.getFixtureB().getUserData();
-            if (aUserData instanceof Car) {
-                if (bUserData instanceof CheckPoint) {
-                    aUserData.onCheckPoint(bUserData.index, this.totalSec, this.course.checkPointCount);
-                }
-            } else if (bUserData instanceof Car) {
-                if (aUserData instanceof CheckPoint) {
-                    bUserData.onCheckPoint(aUserData.index, this.totalSec, this.course.checkPointCount);
-                }
-            }
-        });
-
+        this.car.reset(this.gameWorld.course.startPos, Math.PI / 2);
         this.layout();
     }
 
@@ -73,150 +51,23 @@ export class GameScene extends Scene {
 
     private layout() {
         const screenSize = this.sceneController.screenSize;
-        if (Vec2.areEqual(screenSize, this._lastScreenSize)) { return; }
-        this._lastScreenSize = screenSize;
-
-        const courseSize = this.course.size;
-        const scale = Math.min(screenSize.x / courseSize.x, screenSize.y / courseSize.y);
-        const scaledSize = Vec2.mul(courseSize, scale);
-        const offset = Vec2.mul(0.5, Vec2.sub(screenSize, scaledSize));
-        //console.log(scaledSize, offset);
-        
-        // コース→画面の変換行列を作っておきます。
-        const mat = new DOMMatrix();
-        mat.translateSelf(offset.x, offset.y, 0);
-        mat.scaleSelf(scale, scale, 1, 0, 0, 0);
-        mat.translateSelf(0, courseSize.y, 0);
-        mat.scaleSelf(1, -1, 1, 0, 0, 0);
-        this.courseMatrix = mat;
-
-        const pixelScale = pixelToSim * mat.a;
-        
-        this.courseCanvas.size = screenSize;
-
-        const ctx = this.courseCanvas.ctx;
-        ctx.imageSmoothingEnabled = false;
-        ctx.setLineDash([]);
-        ctx.lineJoin = "round";
-        const path = new Path2D();
-        this.course.outerWalls.forEach(wall => wall.forEach((pt, idx) => idx == 0 ? path.moveTo(pt.x, pt.y) : path.lineTo(pt.x, pt.y)));
-        path.closePath();
-
-        // 背景を芝生で塗りつぶします。
-        {
-            ctx.resetTransform();
-            ctx.scale(pixelScale, pixelScale);
-            const pattern = ctx.createPattern(spriteSheet.crop(spriteInfos.grass).canvas, "repeat")!;
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.courseCanvas.canvas.width / pixelScale + 10, this.courseCanvas.canvas.height / pixelScale + 10);
-        }
-
-        this.courseCanvas.ctx.setTransform(mat);
-
-        // コースをアスファルトテクスチャで塗りつぶします。
-        {
-            ctx.save();
-            ctx.clip(path);
-            ctx.resetTransform();
-            ctx.scale(pixelScale, pixelScale);
-            const pattern = ctx.createPattern(spriteSheet.crop(spriteInfos.asphalt).canvas, "repeat")!;
-
-            ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.courseCanvas.canvas.width / pixelScale + 10, this.courseCanvas.canvas.height / pixelScale + 10);
-            ctx.restore();
-        }
-
-        // ゴール
-        {
-            const checkPoints = this.course.checkPoints;
-            if (checkPoints.length > 0) {
-                ctx.save();
-                ctx.clip(path);
-                const blockSize = 0.04;
-                
-                const drawLine = (xOffset: number) => {
-                    ctx.beginPath();
-                    ctx.moveTo(checkPoints[0][0].x + xOffset, checkPoints[0][0].y);
-                    ctx.lineTo(checkPoints[0][1].x + xOffset, checkPoints[0][1].y);
-                    ctx.stroke();
-                }
-                
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = blockSize * 4;
-                drawLine(0);
-
-                ctx.strokeStyle = "white";
-                ctx.lineWidth = blockSize;
-                ctx.setLineDash([blockSize, blockSize]);
-                drawLine(-blockSize * 1.5);
-                drawLine(+blockSize * 0.5);
-                ctx.lineDashOffset = blockSize;
-                drawLine(-blockSize * 0.5);
-                drawLine(+blockSize * 1.5);
-
-                ctx.restore();
-            }
-        }
-
-        // 縁石
-        {
-            ctx.save();
-            ctx.clip(path);
-
-            ctx.lineWidth = 0.08;
-            ctx.strokeStyle = "white";
-            ctx.stroke(path);
-
-            ctx.setLineDash([0.08, 0.08]);
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 0.06;
-            ctx.stroke(path);
-
-            ctx.restore();
-        }
-
-        ctx.setLineDash([]);
-        ctx.lineWidth = 0.02;
-        ctx.strokeStyle = "rgb(50, 50, 50)";
-        ctx.stroke(path);
-
+        this.courseView.render(this.gameWorld.course, screenSize);
         this.updateCarView();
     }
 
     private updateCarView() {
-        this.carView.update(this.car, this.courseMatrix);
+        this.carView.update(this.car, this.courseView.matrix);
     }
 
     private onTicker(deltaSec: number) {
-        //console.log(frameStep);
         this.car.update();
-
-        
-        this.totalSec += deltaSec;
-        this.world.step(deltaSec);
+        this.gameWorld.step(deltaSec);
         this.updateCarView();
         this.updateTextInfo();
     }
 
-    private formatTime(sec?: number): string {
-
-        if (sec == null) { return "--'00.000"; }
-
-        // 分と秒を計算
-        const minutes = Math.floor(sec / 60);
-        const seconds = Math.floor(sec % 60);
-        const milliseconds = Math.floor((sec % 1) * 1000);
-    
-        // フォーマット：分 ' 秒.ミリ秒
-        const formattedTime = `${minutes}'${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
-    
-        return formattedTime;
-    }
-
     private updateTextInfo() {
-
-        const lapTime = this.car.startSec == null ? this.formatTime() : this.formatTime(this.totalSec - this.car.startSec);
-
-        this.textEl.text(`Lap: ${lapTime}　　　Last: ${this.formatTime(this.car.lastLapTime)}　　　Best: ${this.formatTime(this.car.bestLapTime)}`);
+        const lapTime = this.car.startSec == null ? formatLapTime() : formatLapTime(this.gameWorld.totalSec - this.car.startSec);
+        this.textEl.text(`Lap: ${lapTime}　　　Last: ${formatLapTime(this.car.lastLapTime)}　　　Best: ${formatLapTime(this.car.bestLapTime)}`);
     }
 }

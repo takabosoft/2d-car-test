@@ -7,7 +7,7 @@ export class CheckPoint {
         body.createFixture({
             shape: new Edge(checkPoint[0], checkPoint[1]),
             isSensor: true,
-            filterCategoryBits: FilterCategory.Wall,
+            filterCategoryBits: FilterCategory.Sensor,
             userData: this,
         })
     }

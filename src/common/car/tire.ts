@@ -43,7 +43,7 @@ export class Tire {
             restitution: 0.8,
             
             filterCategoryBits: FilterCategory.Car,
-            filterMaskBits: FilterCategory.Wall,
+            filterMaskBits: FilterCategory.Wall | FilterCategory.Sensor,
         });
     }
 

@@ -50,7 +50,7 @@ export class Car {
             friction: 0.0,
             restitution: 0.8,
             filterCategoryBits: FilterCategory.Car,
-            filterMaskBits: FilterCategory.Wall,
+            filterMaskBits: FilterCategory.Wall | FilterCategory.Sensor,
             userData: this,
         });
 
@@ -99,6 +99,22 @@ export class Car {
         const desiredAngle = -this.controlState.steeringRatio * lockAngle;
         this.flJoint.setLimits(desiredAngle, desiredAngle);
         this.frJoint.setLimits(desiredAngle, desiredAngle);
+    }
+
+    rayCast(maxDis: number, rotationOffsetRad: number): number | undefined {
+        const unit = this.body.getWorldVector(rotateVec2(new Vec2(0, 1), rotationOffsetRad));
+        const rayStart = this.body.getPosition();
+        const rayEnd = Vec2.add(rayStart,  Vec2.mul(unit, maxDis));
+
+        let result: number | undefined = undefined;
+        this.body.getWorld().rayCast(rayStart, rayEnd, (fixture, point, normal, fraction) => {
+            if ((fixture.getFilterCategoryBits() & FilterCategory.Wall) == 0) {
+                return 1;
+            }
+            result = fraction * maxDis;
+            return 0;
+        });
+        return result;
     }
 
     /** 位置と角度を初期化します。 */
