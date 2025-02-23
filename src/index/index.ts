@@ -20,7 +20,8 @@ class HumanPlayer {
     onKeyDown(key: string): void {
         switch (key) {
             case "W": this.controlState.accel = true; break;
-            case "S": this.controlState.back = true; break;
+            case "S": this.controlState.brake = true; break;
+            case "X": this.controlState.back = true; break;
             case "A": this.controlState.left = true; break;
             case "D": this.controlState.right = true; break;
         }
@@ -29,7 +30,8 @@ class HumanPlayer {
     onKeyUp(key: string): void {
         switch (key) {
             case "W": this.controlState.accel = false; break;
-            case "S": this.controlState.back = false; break;
+            case "S": this.controlState.brake = false; break;
+            case "X": this.controlState.back = false; break;
             case "A": this.controlState.left = false; break;
             case "D": this.controlState.right = false; break;
         }

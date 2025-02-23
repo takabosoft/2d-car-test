@@ -20,8 +20,9 @@ export class Tire {
         world: World,
         private readonly maxForwardSpeed: number,
         private readonly maxBackwardSpeed: number,
-        private readonly driveForce: number,
-        private readonly maxLateralImpulse: number,
+        private readonly forwardDriveForce: number,
+        private readonly backwardDriveForce: number,
+        //private readonly maxLateralImpulse: number,
     ) {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
@@ -59,9 +60,14 @@ export class Tire {
 
     /** 摩擦処理 */
     updateFriction() {
+
+        /*{
+            this.body.setLinearVelocity(this.body.getWorldVector(new Vec2(0, 1)).mul(this.body.getLinearVelocity().length()));   
+        }*/
+
+       
         // 横方向を打ち消す
         let impulse = this.lateralVelocity.neg().mul(this.body.getMass());
-
         // 横方向の打ち消す力に上限を設けることで横滑りとなる
         //if (impulse.length() > this.maxLateralImpulse) {
             //impulse = Vec2.mul(this.maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
@@ -80,6 +86,16 @@ export class Tire {
 
     /** 前進・後退 */
     updateDrive(controlState: ControlState) {
+
+        // ブレーキ
+        if (controlState.brake) {
+            const currentForwardNormal = this.forwardVelocity;
+            const currentForwardSpeed = currentForwardNormal.normalize();
+            const dragForceMagnitude = -0.015 * currentForwardSpeed;
+            this.body.applyForce(Vec2.mul(currentForwardNormal, dragForceMagnitude), this.body.getWorldCenter());
+        }
+
+
         //find desired speed
         let desiredSpeed = 0;
         if (controlState.accel) {
@@ -95,9 +111,9 @@ export class Tire {
         //apply necessary force
         let force = 0;
         if (desiredSpeed > currentSpeed) {
-            force = this.driveForce;
+            force = this.forwardDriveForce;
         } else if (desiredSpeed < 0 && desiredSpeed < currentSpeed) {
-            force = -this.driveForce;
+            force = -this.backwardDriveForce;
         } else {
             return;
         }
