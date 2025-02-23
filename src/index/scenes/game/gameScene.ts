@@ -22,12 +22,14 @@ export class GameScene extends Scene {
     private readonly carView = new CarView();
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
     private totalSec = 0;
+    private readonly textEl = $(`<div class="text">`);
 
     constructor(sceneController: SceneController) {
         super(sceneController, "game-scene");
         this.element.append(
             this.courseCanvas.element.addClass("course-canvas"),
             this.carView.element,
+            this.textEl,
         )
         this.car.reset(this.course.startPos, Math.PI / 2);
 
@@ -172,5 +174,28 @@ export class GameScene extends Scene {
         this.totalSec += deltaSec;
         this.world.step(deltaSec);
         this.updateCarView();
+        this.updateTextInfo();
+    }
+
+    private formatTime(sec?: number): string {
+
+        if (sec == null) { return "--'00.000"; }
+
+        // 分と秒を計算
+        const minutes = Math.floor(sec / 60);
+        const seconds = Math.floor(sec % 60);
+        const milliseconds = Math.floor((sec % 1) * 1000);
+    
+        // フォーマット：分 ' 秒.ミリ秒
+        const formattedTime = `${minutes}'${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+    
+        return formattedTime;
+    }
+
+    private updateTextInfo() {
+
+        const lapTime = this.car.startSec == null ? this.formatTime() : this.formatTime(this.totalSec - this.car.startSec);
+
+        this.textEl.text(`Lap: ${lapTime}　　　Last: ${this.formatTime(this.car.lastLapTime)}　　　Best: ${this.formatTime(this.car.bestLapTime)}`);
     }
 }

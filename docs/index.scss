@@ -35,6 +35,20 @@ body {
 
 .game-scene {
     //background: green;
+
+    .text {
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 8px;
+        padding: 8px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 4px;
+        width: fit-content;
+        margin: 0 auto;
+        font-size: 14px;
+        color: white;
+    }
 }
 
 .course-canvas {

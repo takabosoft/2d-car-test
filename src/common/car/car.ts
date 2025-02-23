@@ -79,6 +79,12 @@ export class Car {
         appendTire(+5.5, 4.5 - 1 - 8, backTireForwardDriveForce, backTireBackwardDriveForce);
     }
 
+    get startSec() { return this._startSec; }
+    get lastLapTime(): number | undefined {
+        if (this.lapTimes.length == 0) { return undefined; }
+        return this.lapTimes[this.lapTimes.length - 1];
+    }
+    get bestLapTime() { return this._bestLapTime; }
     get getTireAngle() { return this.flJoint.getLowerLimit(); }
 
     update() {
@@ -119,7 +125,6 @@ export class Car {
                     if (this._bestLapTime == null || this._bestLapTime > lapTime) {
                         this._bestLapTime = lapTime;
                     }
-                    console.log(lapTime);
                     this.lapTimes.push(lapTime);
                 }
             }
@@ -132,6 +137,5 @@ export class Car {
                 this.checkPointHistory.push(idx);
             }
         }
-        //console.log(JSON.stringify(this.checkPointHistory));
     }
 }
