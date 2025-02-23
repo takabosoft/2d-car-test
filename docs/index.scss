@@ -55,6 +55,12 @@ body {
     > .tire {
         position: absolute;
         will-change: transform;
+        background: black;
+        width: 2px;
+        height: 3px;
+        left: 0;
+        top: 0;
+        transform-origin: center;
     }
 
     > .body {

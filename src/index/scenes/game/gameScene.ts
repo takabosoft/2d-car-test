@@ -112,17 +112,7 @@ export class GameScene extends Scene {
     }
 
     private updateCarView() {
-        const mat = new DOMMatrix();
-        mat.multiplySelf(this.courseMatrix);
-        const pos = this.car.body.getPosition();
-        mat.translateSelf(pos.x, pos.y);
-        
-        mat.scaleSelf(pixelToSim, pixelToSim, 1);
-
-        mat.rotateSelf(0, 0, this.car.body.getAngle() * radToDeg);
-        mat.scaleSelf(1, -1, 1);
-        mat.translateSelf(-13 / 2, -16 / 2, 0);
-        this.carView.element[0].style.transform = mat.toString();
+        this.carView.update(this.car, this.courseMatrix);
     }
 
     private onTicker(frameStep: number) {

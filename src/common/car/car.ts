@@ -72,6 +72,8 @@ export class Car {
         appendTire(-5.5, 4.5 - 1 - 8, backTireForwardDriveForce, backTireBackwardDriveForce);
         appendTire(+5.5, 4.5 - 1 - 8, backTireForwardDriveForce, backTireBackwardDriveForce);
     }
+    
+    get getTireAngle() { return this.flJoint.getLowerLimit(); }
 
     update() {
         this.tires.forEach(t => t.updateFriction());
@@ -82,7 +84,6 @@ export class Car {
 
         //control steering
         const lockAngle = 45 * degToRad;
-
         const desiredAngle = -this.controlState.steeringRatio * lockAngle;
         this.flJoint.setLimits(desiredAngle, desiredAngle);
         this.frJoint.setLimits(desiredAngle, desiredAngle);
