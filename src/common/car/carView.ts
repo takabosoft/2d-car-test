@@ -18,7 +18,7 @@ export class CarView extends Component {
     readonly rlTire: TireView;
     readonly rrTire: TireView;
 
-    constructor() {
+    constructor(isRandomColor = false) {
         super();
         this.element = $(`<div class="car">`);
 
@@ -37,7 +37,11 @@ export class CarView extends Component {
         this.rlTire = initTire(0, 10);
         this.rrTire = initTire(11, 10);
 
-        this.element.append($(spriteSheet.crop(spriteInfos.car).canvas).addClass("body"));
+        const body = $(spriteSheet.crop(spriteInfos.car).canvas).addClass("body");
+        if (isRandomColor) {
+            body[0].style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+        }
+        this.element.append(body);
     }
 
     update(car: Car, courseMatrix: DOMMatrix) {

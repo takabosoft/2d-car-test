@@ -2,7 +2,6 @@
 import { Ticker } from "../../../common/animation/ticker";
 import { Car } from "../../../common/car/car";
 import { CarView } from "../../../common/car/carView";
-import { ControlState } from "../../../common/car/controlState";
 import { CourseView } from "../../../common/courses/courseView";
 import { RobotDriver } from "../../../common/drivers/robotDriver";
 import { GameWorld } from "../../../common/gameWorld";
@@ -16,15 +15,15 @@ export class GeneticGameScene extends Scene {
     //private readonly humanDriver = new HumanDriver();
 
     private readonly robotDriver = new RobotDriver({
-        rayCastMinDistance: 0.1,
-        rayCastMaxDistance: 0.3,
-        rayCastSpeedRatio: 1,
+        rayCastMinDistance: 0.2,
+        rayCastMaxDistance: 0.7,
+        rayCastSpeedRatio: 0.5,
         steeringMinRatio: 0,
         steeringMaxRatio: 1,
         rayCastDirectionOffsetRad: 30 * degToRad,
     });
     private readonly car = new Car(this.gameWorld.world, this.robotDriver.controlState);
-    private readonly carView = new CarView();
+    private readonly carView = new CarView(true);
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
     //private readonly textEl = $(`<div class="lap-info">`);
 
