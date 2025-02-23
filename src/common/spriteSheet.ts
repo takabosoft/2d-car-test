@@ -5,6 +5,8 @@ import { TinyCanvas } from "./utils/tinyCanvas";
 
 export const spriteInfos = {
     car: new Rect(2, 2, 13, 16),
+    asphalt: new Rect(18, 2, 23, 23),
+    grass: new Rect(44, 2, 23, 23),
 } as const;
 
 class SpriteSheet {

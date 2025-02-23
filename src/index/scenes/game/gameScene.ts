@@ -9,6 +9,7 @@ import { CarView } from "../../../common/car/carView";
 import { pixelToSim } from "../../../common/env";
 import { degToRad, radToDeg } from "../../../common/utils/mathUtils";
 import { Ticker } from "../../../common/animation/ticker";
+import { spriteInfos, spriteSheet } from "../../../common/spriteSheet";
 
 export class GameScene extends Scene {
     private readonly world = new World({ gravity: new Vec2(0, 0) });
@@ -69,36 +70,54 @@ export class GameScene extends Scene {
         mat.translateSelf(0, courseSize.y, 0);
         mat.scaleSelf(1, -1, 1, 0, 0, 0);
         this.courseMatrix = mat;
+
+        const pixelScale = pixelToSim * mat.a;
         
         this.courseCanvas.size = screenSize;
-        this.courseCanvas.clear();
-        this.courseCanvas.ctx.setTransform(mat);
+        //this.courseCanvas.clear();
 
         const ctx = this.courseCanvas.ctx;
-
+        ctx.imageSmoothingEnabled = false;
+        ctx.setLineDash([]);
+        ctx.lineJoin = "round";
         const path = new Path2D();
         this.course.outerWalls.forEach(wall => wall.forEach((pt, idx) => idx == 0 ? path.moveTo(pt.x, pt.y) : path.lineTo(pt.x, pt.y)));
         path.closePath();
 
-        ctx.setLineDash([]);
-        ctx.lineJoin = "round";
-        /*ctx.lineWidth = 0.04;
-        ctx.lineJoin = "round";
-        ctx.strokeStyle = "rgb(0, 0, 0)";
-        ctx.stroke(path);*/
+        // 背景を芝生で塗りつぶします。
+        {
+            ctx.resetTransform();
+            ctx.scale(pixelScale, pixelScale);
+            const pattern = ctx.createPattern(spriteSheet.crop(spriteInfos.grass).canvas, "repeat")!;
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, this.courseCanvas.canvas.width, this.courseCanvas.canvas.height);
+        }
 
-        ctx.fillStyle = "rgb(64, 64, 64)";
-        ctx.fill(path, "evenodd");
+        this.courseCanvas.ctx.setTransform(mat);
+
+        // コースをアスファルトテクスチャで塗りつぶします。
+        {
+            ctx.save();
+            ctx.clip(path);
+            ctx.resetTransform();
+            ctx.scale(pixelScale, pixelScale);
+            const pattern = ctx.createPattern(spriteSheet.crop(spriteInfos.asphalt).canvas, "repeat")!;
+
+            ctx.fillStyle = pattern;
+            ctx.fillRect(0, 0, this.courseCanvas.canvas.width, this.courseCanvas.canvas.height);
+            ctx.restore();
+        }
 
         ctx.save();
         ctx.clip(path);
 
-        ctx.lineWidth = 0.06;
+        ctx.lineWidth = 0.08;
         ctx.strokeStyle = "white";
         ctx.stroke(path);
 
-        ctx.setLineDash([0.1, 0.1]);
+        ctx.setLineDash([0.08, 0.08]);
         ctx.strokeStyle = "red";
+        ctx.lineWidth = 0.06;
         ctx.stroke(path);
 
         ctx.restore();

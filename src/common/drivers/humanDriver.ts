@@ -9,7 +9,7 @@ export class HumanDriver {
     }
 
     onKeyDown(e: KeyboardEvent): void {
-        console.log(e.key);
+        //console.log(e.key);
         switch (e.key) {
             case "w": this.controlState.accel = true; break;
             case "s": this.controlState.brake = true; break;
