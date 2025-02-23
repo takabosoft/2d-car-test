@@ -1,6 +1,6 @@
 import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from "planck/with-testbed";
 import { ControlState } from "./controlState";
-import { pixelToSim } from "../env";
+import { FilterCategory, pixelToSim } from "../env";
 
 /**
  * タイヤクラス
@@ -41,6 +41,8 @@ export class Tire {
             // 跳ね返り
             restitution: 0.8,
             //userData
+            filterCategoryBits: FilterCategory.Car,
+            filterMaskBits: FilterCategory.Wall,
         });
     }
 

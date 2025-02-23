@@ -57,13 +57,13 @@ $(() => {
     });
 
     const testCourse = new TestCourse(world);
-
     const testPlayer = new HumanPlayer();
-
-    //const tire = new Tire(world, testPlayer.controlState);
 
     const car = new Car(world, testPlayer.controlState);
     car.reset(testCourse.startPos, Math.PI / 2);
+
+    //const car2 = new Car(world, new ControlState());
+    //car2.reset(testCourse.startPos, Math.PI / 2);
 
     const testbed = Testbed.mount();
     testbed.x = -testCourse.size.x / 2;
@@ -73,14 +73,11 @@ $(() => {
 
     testbed.start(world);
     testbed.keydown = (keyCode, label) => {
-        //console.log(keyCode);
-        //const force = new Vec2(0, 5000);  // 上方向に500の力
-        //rectBody.applyForce(force, rectBody.getWorldCenter());  // 物体に力を加える*/
         testPlayer.onKeyDown(label);
 
         if (label == " ") {
             console.log("TEST");
-            car.reset(new Vec2(0, 10), Math.PI / 2);
+            car.reset(testCourse.startPos, Math.PI / 2);
             world.clearForces();
         }
     };

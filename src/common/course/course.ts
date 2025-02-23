@@ -1,5 +1,5 @@
 import { Chain, Vec2, World } from "planck/with-testbed";
-import { pixelToSim } from "../env";
+import { FilterCategory, pixelToSim } from "../env";
 
 export type Polygon = [number, number][];
 
@@ -17,7 +17,10 @@ export class Course {
             // 物理エンジンはY軸が上向きなので変換します。
             const chain = new Chain(chainPath.map(p => this.convertPosXY(p[0], p[1])));
             const boundaryChain = world.createBody();
-            boundaryChain.createFixture(chain, { friction: 1.0 });
+            boundaryChain.createFixture(chain, { 
+                friction: 1.0,
+                filterCategoryBits: FilterCategory.Wall,
+            });
         });
     }
 

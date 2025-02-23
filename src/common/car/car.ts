@@ -2,7 +2,7 @@ import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Cha
 import { Tire } from "./tire";
 import { ControlState } from "./controlState";
 import { clamp, degToRad, rotateVec2 } from "../utils/mathUtils";
-import { pixelToSim } from "../env";
+import { FilterCategory, pixelToSim } from "../env";
 
 export class Car {
     readonly body: Body;
@@ -44,6 +44,8 @@ export class Car {
             // 摩擦係数
             friction: 0.0,
             restitution: 0.8,
+            filterCategoryBits: FilterCategory.Car,
+            filterMaskBits: FilterCategory.Wall,
         });
 
         const appendTire = (x: number, y: number, forwardDriveForce: number, backwardDriveForce: number/*, maxLateralImpulse: number*/) => {
