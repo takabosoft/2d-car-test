@@ -79,21 +79,8 @@ export class Car {
 
         //control steering
         const lockAngle = 45 * degToRad;
-        const turnSpeedPerSec = 160 * degToRad;//from lock to lock in 0.5 sec
-        const turnPerTimeStep = turnSpeedPerSec / 60.0;
 
-        let desiredAngle = 0;
-        if (this.controlState.left) {
-            desiredAngle = lockAngle;
-        } else if (this.controlState.right) {
-            desiredAngle = -lockAngle;
-        }
-
-        const angleNow = this.flJoint.getJointAngle();
-        let angleToTurn = desiredAngle - angleNow;
-        angleToTurn = clamp(angleToTurn, -turnPerTimeStep, turnPerTimeStep);
-
-        const newAngle = angleNow + angleToTurn;
+        const desiredAngle = -this.controlState.steeringRatio * lockAngle;
         this.flJoint.setLimits(desiredAngle, desiredAngle);
         this.frJoint.setLimits(desiredAngle, desiredAngle);
     }
