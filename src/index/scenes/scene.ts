@@ -1,7 +1,8 @@
 import { Component } from "../../common/components/component";
+import { SceneController } from "./sceneController";
 
 export class Scene extends Component {
-    constructor(addClass: string) {
+    constructor(readonly sceneController: SceneController, addClass: string) {
         super();
         this.element = $(`<div class="scene">`).addClass(addClass);
     }
@@ -13,6 +14,11 @@ export class Scene extends Component {
 
     /** 画面が消えるときに呼ばれます。 */
     onEndScene(): void {
+
+    }
+
+    /** 画面サイズが変わったときに呼ばれます。 */
+    onResize(): void {
 
     }
 }

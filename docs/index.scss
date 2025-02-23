@@ -1,3 +1,27 @@
+body,
+html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+* {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body {
+    font-family: "Noto Sans JP", serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.0;
+    background: white;
+    -webkit-tap-highlight-color: transparent;
+}
+
 .scene {
     position: absolute;
     inset: 0;
@@ -7,4 +31,10 @@
 .scene-ctrl {
     position: absolute;
     inset: 0;
+}
+
+.game-scene {
+    .course-canvas {
+        
+    }
 }

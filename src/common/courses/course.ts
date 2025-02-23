@@ -27,6 +27,8 @@ export class Course {
     get size() { return this.info.size.clone().mul(pixelToSim); }
     get startPos() { return this.convertPosVec2(this.info.startPos); }
 
+    get outerWalls() { return this.info.outerWalls.map(poly => poly.map(p => this.convertPosXY(p[0], p[1]))); }
+
     private convertPosXY(x: number, y: number): Vec2 {
         return new Vec2(x, this.info.size.y - y).mul(pixelToSim);
     }

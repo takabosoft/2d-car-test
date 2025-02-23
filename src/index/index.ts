@@ -18,7 +18,7 @@ import { GameScene } from "./scenes/game/gameScene";
 
 
 
-$(() => pageController.start());
+$(() => new PageController().start());
     //console.log("OK");
 
     /*const world = new World({
@@ -68,8 +68,6 @@ class PageController {
 
     start() {
         $(document.body).append(this.sceneController.element);
-        this.sceneController.changeScene(new GameScene());
+        this.sceneController.changeScene(new GameScene(this.sceneController));
     }
 }
-
-export const pageController = new PageController();
