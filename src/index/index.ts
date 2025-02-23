@@ -9,63 +9,32 @@
 import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from "planck/with-testbed";
 import { Car } from "../common/car/car";
 import { ControlState } from "../common/car/controlState";
-import { TestCourse } from "../common/course/course";
+import { TestCourse } from "../common/courses/course";
+import { SceneController } from "./scenes/sceneController";
+import { GameScene } from "./scenes/game/gameScene";
 
 
 
 
-class HumanPlayer {
-    readonly controlState = new ControlState();
-    private readonly keyState = new Set<string>();
 
-    private get calcSteeringRatio() {
-        return 0 + (this.keyState.has("A") ? -1 : 0) + (this.keyState.has("D") ? +1 : 0);
-    }
 
-    onKeyDown(key: string): void {
-        switch (key) {
-            case "W": this.controlState.accel = true; break;
-            case "S": this.controlState.brake = true; break;
-            case "X": this.controlState.back = true; break;
-            case "A":
-            case "D":
-                this.keyState.add(key);
-                this.controlState.steeringRatio = this.calcSteeringRatio;
-                break;
-        }
-    }
+$(() => pageController.start());
+    //console.log("OK");
 
-    onKeyUp(key: string): void {
-        switch (key) {
-            case "W": this.controlState.accel = false; break;
-            case "S": this.controlState.brake = false; break;
-            case "X": this.controlState.back = false; break;
-            case "A":
-            case "D":
-                this.keyState.delete(key);
-                this.controlState.steeringRatio = this.calcSteeringRatio;
-                break;
-        }
-    }
-}
-
-$(() => {
-    console.log("OK");
-
-    const world = new World({
+    /*const world = new World({
         gravity: new Vec2(0, 0),
-    });
+    });*/
 
-    const testCourse = new TestCourse(world);
-    const testPlayer = new HumanPlayer();
+    //const testCourse = new TestCourse(world);
+    //const testPlayer = new HumanDriver();
 
-    const car = new Car(world, testPlayer.controlState);
-    car.reset(testCourse.startPos, Math.PI / 2);
+    //const car = new Car(world, testPlayer.controlState);
+    //car.reset(testCourse.startPos, Math.PI / 2);
 
     //const car2 = new Car(world, new ControlState());
     //car2.reset(testCourse.startPos, Math.PI / 2);
 
-    const testbed = Testbed.mount();
+    /*const testbed = Testbed.mount();
     testbed.x = -testCourse.size.x / 2;
     testbed.y = -testCourse.size.y / 2;
     testbed.width = testCourse.size.x;
@@ -91,6 +60,16 @@ $(() => {
         car.update();
         //car.reset(new Vec2(0, 10), a);
         //a += 0.1;
-    };
-})
+    };*/
+//})
 
+class PageController {
+    readonly sceneController = new SceneController();
+
+    start() {
+        $(document.body).append(this.sceneController.element);
+        this.sceneController.changeScene(new GameScene());
+    }
+}
+
+export const pageController = new PageController();
