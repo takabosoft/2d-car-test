@@ -1,5 +1,6 @@
 import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Chain } from "planck/with-testbed";
 import { ControlState } from "./controlState";
+import { pixelToSim } from "../env";
 
 /**
  * タイヤクラス
@@ -25,13 +26,13 @@ export class Tire {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
             //angle: Math.PI / 5,
-            linearDamping: 0,
+            linearDamping: 3,
             angularDamping: 0,
         });
 
         this.body.createFixture({
             // 形状
-            shape: new Box(2 / 2, 3 / 2),
+            shape: new Box(2 / 2 * pixelToSim, 3 / 2 * pixelToSim),
             // 密度 大きいと重い
             density: 1.0,
             // 摩擦係数
@@ -62,19 +63,19 @@ export class Tire {
         let impulse = this.lateralVelocity.neg().mul(this.body.getMass());
 
         // 横方向の打ち消す力に上限を設けることで横滑りとなる
-        if (impulse.length() > this.maxLateralImpulse) {
-            impulse = Vec2.mul(this.maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
-        }
+        //if (impulse.length() > this.maxLateralImpulse) {
+            //impulse = Vec2.mul(this.maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
+        //}
         this.body.applyLinearImpulse(impulse, this.body.getWorldCenter());
 
         // 自転も打ち消す
-        this.body.applyAngularImpulse(0.1 * this.body.getInertia() * -this.body.getAngularVelocity());
+        //this.body.applyAngularImpulse(1 * this.body.getInertia() * -this.body.getAngularVelocity());
 
         // 減速
-        const currentForwardNormal = this.forwardVelocity;
+        /*const currentForwardNormal = this.forwardVelocity;
         const currentForwardSpeed = currentForwardNormal.normalize();
-        const dragForceMagnitude = -2 * currentForwardSpeed;
-        this.body.applyForce(Vec2.mul(currentForwardNormal, dragForceMagnitude), this.body.getWorldCenter());
+        const dragForceMagnitude = -0.02 * currentForwardSpeed;
+        this.body.applyForce(Vec2.mul(currentForwardNormal, dragForceMagnitude), this.body.getWorldCenter());*/
     }
 
     /** 前進・後退 */

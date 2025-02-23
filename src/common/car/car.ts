@@ -2,6 +2,7 @@ import { World, Testbed, Box, Vec2, Body, PolygonShape, RevoluteJoint, Edge, Cha
 import { Tire } from "./tire";
 import { ControlState } from "./controlState";
 import { clamp, degToRad, rotateVec2 } from "../utils/mathUtils";
+import { pixelToSim } from "../env";
 
 export class Car {
     readonly body: Body;
@@ -16,14 +17,14 @@ export class Car {
             angularDamping: 0, // 回転摩擦
         });
 
-        const maxForwardSpeed = 10000;
+        const maxForwardSpeed = 10;
         const maxBackwardSpeed = -40;
 
-        const frontTireDriveForce = 800;
-        const frontTireMaxLateralImpulse = 40.5 * 3; // 横滑り、旋回能力に影響
+        const frontTireDriveForce = 0;
+        const frontTireMaxLateralImpulse = 40.5 * 300; // 横滑り、旋回能力に影響
 
-        const backTireDriveForce = 8000;
-        const backTireMaxLateralImpulse = 40;
+        const backTireDriveForce = 0.02;
+        const backTireMaxLateralImpulse = 40 * 300;
 
         const shape = new PolygonShape([
             new Vec2(-5.5, 0),
@@ -32,12 +33,12 @@ export class Car {
             new Vec2(+5.5 - 2, 16),
             new Vec2(+5.5, 16 - 2),
             new Vec2(+5.5, 0),
-        ]);
+        ].map(s => s.mul(pixelToSim)));
 
         this.body.createFixture({
             shape: shape,
             // 密度 大きいと重い
-            density: 0.1,
+            density: 1.5,
             // 摩擦係数
             friction: 0.0,
             restitution: 0.8,
@@ -53,7 +54,7 @@ export class Car {
                 lowerAngle: 0,
                 upperAngle: 0,
                 bodyB: tire.body,
-                localAnchorA: new Vec2(x, y),
+                localAnchorA: new Vec2(x, y).mul(pixelToSim),
                 localAnchorB: new Vec2(0, 0),
             });
             const joint = world.createJoint(def)!;
@@ -75,7 +76,7 @@ export class Car {
         // 回転ジョインとの下限上限を使って強制的に変更します。
 
         //control steering
-        const lockAngle = 40 * degToRad;
+        const lockAngle = 45 * degToRad;
         const turnSpeedPerSec = 160 * degToRad;//from lock to lock in 0.5 sec
         const turnPerTimeStep = turnSpeedPerSec / 60.0;
 

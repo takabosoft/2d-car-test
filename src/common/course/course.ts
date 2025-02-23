@@ -1,4 +1,5 @@
 import { Chain, Vec2, World } from "planck/with-testbed";
+import { pixelToSim } from "../env";
 
 export type Polygon = [number, number][];
 
@@ -20,15 +21,15 @@ export class Course {
         });
     }
 
-    get size() { return this.info.size; }
+    get size() { return this.info.size.clone().mul(pixelToSim); }
     get startPos() { return this.convertPosVec2(this.info.startPos); }
 
     private convertPosXY(x: number, y: number): Vec2 {
-        return new Vec2(x, this.info.size.y - y);
+        return new Vec2(x, this.info.size.y - y).mul(pixelToSim);
     }
 
     private convertPosVec2(v: Vec2): Vec2 {
-        return new Vec2(v.x, this.info.size.y - v.y);
+        return new Vec2(v.x, this.info.size.y - v.y).mul(pixelToSim);
     }
 }
 

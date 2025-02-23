@@ -1,0 +1,1 @@
+export const pixelToSim = 0.01;
