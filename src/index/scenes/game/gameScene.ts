@@ -107,7 +107,7 @@ export class GameScene extends Scene {
             ctx.scale(pixelScale, pixelScale);
             const pattern = ctx.createPattern(spriteSheet.crop(spriteInfos.grass).canvas, "repeat")!;
             ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.courseCanvas.canvas.width, this.courseCanvas.canvas.height);
+            ctx.fillRect(0, 0, this.courseCanvas.canvas.width / pixelScale + 10, this.courseCanvas.canvas.height / pixelScale + 10);
         }
 
         this.courseCanvas.ctx.setTransform(mat);
@@ -121,7 +121,7 @@ export class GameScene extends Scene {
             const pattern = ctx.createPattern(spriteSheet.crop(spriteInfos.asphalt).canvas, "repeat")!;
 
             ctx.fillStyle = pattern;
-            ctx.fillRect(0, 0, this.courseCanvas.canvas.width, this.courseCanvas.canvas.height);
+            ctx.fillRect(0, 0, this.courseCanvas.canvas.width / pixelScale + 10, this.courseCanvas.canvas.height / pixelScale + 10);
             ctx.restore();
         }
 
