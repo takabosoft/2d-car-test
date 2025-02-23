@@ -12,29 +12,39 @@ export class Car {
     constructor(world: World, readonly controlState: ControlState) {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
-            angularDamping: 6, // 回転摩擦
-            
+            linearDamping: 0,
+            angularDamping: 0, // 回転摩擦
         });
 
+        const maxForwardSpeed = 10000;
+        const maxBackwardSpeed = -40;
+
+        const frontTireDriveForce = 800;
+        const frontTireMaxLateralImpulse = 40.5 * 3; // 横滑り、旋回能力に影響
+
+        const backTireDriveForce = 8000;
+        const backTireMaxLateralImpulse = 40;
+
         const shape = new PolygonShape([
-            new Vec2(1.5, 0),
-            new Vec2(3, 2.5),
-            new Vec2(2.8, 5.5),
-            new Vec2(1, 10),
-            new Vec2(-1, 10),
-            new Vec2(-2.8, 5.5),
-            new Vec2(-3, 2.5),
-            new Vec2(-1.5, 0)
+            new Vec2(-5.5, 0),
+            new Vec2(-5.5, 16 - 2),
+            new Vec2(-5.5 + 2, 16),
+            new Vec2(+5.5 - 2, 16),
+            new Vec2(+5.5, 16 - 2),
+            new Vec2(+5.5, 0),
         ]);
 
         this.body.createFixture({
             shape: shape,
+            // 密度 大きいと重い
             density: 0.1,
+            // 摩擦係数
+            friction: 0.0,
             restitution: 0.8,
         });
 
         const appendTire = (x: number, y: number, maxDriveForce: number, maxLateralImpulse: number,) => {
-            const tire = new Tire(world, maxDriveForce, maxLateralImpulse); // dummy state
+            const tire = new Tire(world, maxForwardSpeed, maxBackwardSpeed, maxDriveForce, maxLateralImpulse); // dummy state
             this.tires.push(tire);
 
             const def = new RevoluteJoint({
@@ -51,16 +61,10 @@ export class Car {
             return joint;
         };
 
-        const frontTireMaxDriveForce = 500;
-        const frontTireMaxLateralImpulse = 17.5; // 横滑り、旋回能力に影響
-
-        const backTireMaxDriveForce = 300;
-        const backTireMaxLateralImpulse = 19.5;
-
-        this.flJoint = appendTire(-3, 8.5, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
-        this.frJoint = appendTire(+3, 8.5, frontTireMaxDriveForce, frontTireMaxLateralImpulse);
-        appendTire(-3, 0.75, backTireMaxDriveForce, backTireMaxLateralImpulse);
-        appendTire(+3, 0.75, backTireMaxDriveForce, backTireMaxLateralImpulse);
+        this.flJoint = appendTire(-5.5, 11.5 + 1, frontTireDriveForce, frontTireMaxLateralImpulse);
+        this.frJoint = appendTire(+5.5, 11.5 + 1, frontTireDriveForce, frontTireMaxLateralImpulse);
+        appendTire(-5.5, 4.5 - 1, backTireDriveForce, backTireMaxLateralImpulse);
+        appendTire(+5.5, 4.5 - 1, backTireDriveForce, backTireMaxLateralImpulse);
     }
 
     update() {

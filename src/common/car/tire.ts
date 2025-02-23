@@ -7,30 +7,31 @@ import { ControlState } from "./controlState";
  */
 export class Tire {
     readonly body: Body;
-    private readonly maxForwardSpeed = 250;
-    private readonly maxBackwardSpeed = -40;
-
     joint?: RevoluteJoint;
 
     /**
      * 
      * @param world 
-     * @param maxDriveForce 
+     * @param driveForce 前後に押し出す力
      * @param maxLateralImpulse 横滑り打ち消し力上限　小さいとすべる
      */
     constructor(
         world: World,
-        private readonly maxDriveForce: number,
+        private readonly maxForwardSpeed: number,
+        private readonly maxBackwardSpeed: number,
+        private readonly driveForce: number,
         private readonly maxLateralImpulse: number,
     ) {
         this.body = world.createDynamicBody({
             position: new Vec2(0, 0),
             //angle: Math.PI / 5,
+            linearDamping: 0,
+            angularDamping: 0,
         });
 
         this.body.createFixture({
             // 形状
-            shape: new Box(0.5, 1.25),
+            shape: new Box(2 / 2, 3 / 2),
             // 密度 大きいと重い
             density: 1.0,
             // 摩擦係数
@@ -93,9 +94,9 @@ export class Tire {
         //apply necessary force
         let force = 0;
         if (desiredSpeed > currentSpeed) {
-            force = this.maxDriveForce;
-        } else if (desiredSpeed < currentSpeed) {
-            force = -this.maxDriveForce;
+            force = this.driveForce;
+        } else if (desiredSpeed < 0 && desiredSpeed < currentSpeed) {
+            force = -this.driveForce;
         } else {
             return;
         }
