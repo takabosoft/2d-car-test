@@ -61,18 +61,27 @@ export class Tire {
     /** 摩擦処理 */
     updateFriction() {
 
-        /*{
-            this.body.setLinearVelocity(this.body.getWorldVector(new Vec2(0, 1)).mul(this.body.getLinearVelocity().length()));   
-        }*/
+        {
+            const velocity = this.body.getLinearVelocity();
+            const speed = velocity.length();
+            const direction = Vec2.normalize(velocity); // 現在の進行方向（単位ベクトル）
+            const forward = this.body.getWorldVector(new Vec2(0, 1)); // タイヤの前方向ベクトル
 
-       
+            // 速度の方向が forward と逆なら、speed を負にする
+            const correctedSpeed = Vec2.dot(forward, direction) < 0 ? -speed : speed;
+
+            // 正しい方向に速度を適用
+            this.body.setLinearVelocity(forward.mul(correctedSpeed));
+        }
+
+
         // 横方向を打ち消す
-        let impulse = this.lateralVelocity.neg().mul(this.body.getMass());
+        //let impulse = this.lateralVelocity.neg().mul(this.body.getMass());
         // 横方向の打ち消す力に上限を設けることで横滑りとなる
         //if (impulse.length() > this.maxLateralImpulse) {
-            //impulse = Vec2.mul(this.maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
+        //impulse = Vec2.mul(this.maxLateralImpulse / impulse.length(), impulse); // ベクトルの大きさだけmaxLateralImpulseになる
         //}
-        this.body.applyLinearImpulse(impulse, this.body.getWorldCenter());
+        //this.body.applyLinearImpulse(impulse, this.body.getWorldCenter());
 
         // 自転も打ち消す
         //this.body.applyAngularImpulse(1 * this.body.getInertia() * -this.body.getAngularVelocity());

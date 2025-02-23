@@ -20,12 +20,12 @@ export class Car {
         const maxForwardSpeed = 10;
         const maxBackwardSpeed = -0.5;
 
-        const frontTireForwardDriveForce = 0.02;
-        const frontTireBackwardDriveForce = 0.01;
+        const frontTireForwardDriveForce = 0.00;
+        const frontTireBackwardDriveForce = 0.00;
         //const frontTireMaxLateralImpulse = 40.5 * 300; // 横滑り、旋回能力に影響
 
-        const backTireForwardDriveForce = 0.00;
-        const backTireBackwardDriveForce = 0.00;
+        const backTireForwardDriveForce = 0.02;
+        const backTireBackwardDriveForce = 0.01;
         //const backTireMaxLateralImpulse = 40 * 300;
 
         const shape = new PolygonShape([
