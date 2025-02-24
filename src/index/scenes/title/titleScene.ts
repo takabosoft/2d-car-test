@@ -1,5 +1,5 @@
 import { Vec2 } from "planck";
-import { Course, BasicCourse } from "../../../common/courses/course";
+import { Course, Course01, Course02 } from "../../../common/courses/course";
 import { CourseView } from "../../../common/courses/courseView";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
@@ -14,11 +14,13 @@ export class TitleScene extends Scene {
             $(`<div class="content">`).append(
                 $(`<h1>`).text("2D物理エンジンレースカー進化シミュレーター"),
                 $(`<div class="copyright">Copyright (C) 2025 <a href="https://takabosoft.com/" target="_blank">Takabo Soft</a></div>`),
-                this.buildCoursePanel(new BasicCourse(undefined)),
+                this.buildCoursePanel(new Course01(undefined)),
+                this.buildCoursePanel(new Course02(undefined)),
                 $(`
-                    <div class="description">遺伝的アルゴリズムを用いてロボットレースカーが速くなっていくのを眺めるだけのゲームです。
-                        （※ちょっと虫感が強くなってしまった・・・）
+                    <div class="description">よくある「遺伝的アルゴリズムを用いてロボットレースカーが速くなっていくのを眺めるだけ」のゲームです。
+                        （ちょっと虫感が強くなってしまいました！）
                         ロボットは前方の障害物の距離がいくつのときにどれだけハンドルを切るか...といったようなパラメータを遺伝子として組み替えながら次世代へ繋いでいきます。
+                        アクセルはベタ踏みです。
         
                         人間が操作できるモードも用意いたしました。
                         

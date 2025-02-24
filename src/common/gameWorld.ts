@@ -1,7 +1,7 @@
 import { Vec2, World } from "planck";
 import { Car } from "./car/car";
 import { CheckPoint } from "./courses/checkPoint";
-import { Course, CourseId, BasicCourse } from "./courses/course";
+import { Course, CourseId, Course01 } from "./courses/course";
 
 export class GameWorld {
     readonly world = new World({ gravity: new Vec2(0, 0) });
