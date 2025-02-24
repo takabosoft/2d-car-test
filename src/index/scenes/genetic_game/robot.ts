@@ -14,4 +14,9 @@ export class Robot {
         this.car = new Car(world, this.robotDriver.controlState);
         this.carView = new CarView(this.robotDriver.gene.color, this.robotDriver.gene.name);
     }
+
+    destroy() {
+        this.car.destroy();
+        this.carView.destroy();
+    }
 }

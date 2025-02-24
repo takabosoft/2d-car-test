@@ -33,4 +33,6 @@ export class GameWorld {
         this._totalSec += deltaSec;
         this.world.step(deltaSec);
     }
+
+    resetTotalSec() { this._totalSec = 0; }
 }

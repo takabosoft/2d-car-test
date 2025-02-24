@@ -4,6 +4,7 @@ import { Robot } from "./robot";
 
 export class LiveTimingView extends Component{
     lapTimeCache = new Map<Robot, number | undefined>();
+    lastUpdateSec = 0;
 
     constructor() {
         super();
@@ -14,11 +15,12 @@ export class LiveTimingView extends Component{
         this.lapTimeCache.clear();
     }
 
-    update(robots: Robot[]) {
+    update(robots: Robot[], totalSec: number) {
         // 差分があるか調べます
         if (!robots.some(r => !this.lapTimeCache.has(r) || this.lapTimeCache.get(r) != r.car.bestLapTime)) {
             return;
         }
+        this.lastUpdateSec = totalSec;
         this.clearCache();
         robots.forEach(r => this.lapTimeCache.set(r, r.car.bestLapTime));
 

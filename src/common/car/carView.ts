@@ -74,4 +74,9 @@ export class CarView extends Component {
             this.nameView[0].style.transform = `translate(${pos2.x}px, ${pos2.y}px) translate(-50%, -20px)`;
         }
     }
+
+    destroy() {
+        this.element.remove();
+        this.nameView.remove();
+    }
 }

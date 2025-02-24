@@ -154,4 +154,9 @@ export class Car {
             }
         }
     }
+
+    destroy() {
+        // ジョイントなど連結しているものも破棄されるらしい
+        this.body.getWorld().destroyBody(this.body);
+    }
 }

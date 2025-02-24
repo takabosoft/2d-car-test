@@ -2,6 +2,7 @@ import { AnimationFrameRequester } from "./animationFrameRequester";
 
 export class Ticker {
     private readonly req = new AnimationFrameRequester();
+    private isStart = false;
 
     constructor(readonly onFrame: (deltaSec: number) => void) {
 
@@ -9,6 +10,7 @@ export class Ticker {
 
     start() {
         this.stop();
+        this.isStart = true;
 
         let lastTimeMS: number | undefined = undefined;
         
@@ -16,6 +18,9 @@ export class Ticker {
             if (lastTimeMS != null) {
                 let deltaSec = (timeMS - lastTimeMS) / 1000;
                 this.onFrame(deltaSec);
+                if (!this.isStart) {
+                    return;
+                }
             }
             lastTimeMS = timeMS;
             this.req.request(frame);
@@ -25,6 +30,7 @@ export class Ticker {
     }
 
     stop() {
+        this.isStart = false;
         this.req.cancel();
     }
 }

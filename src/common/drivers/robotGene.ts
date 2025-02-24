@@ -1,3 +1,4 @@
+import { lerpNumber } from "../animation/easing";
 import { clamp, degToRad } from "../utils/mathUtils";
 import { randomName } from "../utils/nameGen";
 import { rndRange } from "../utils/random";
@@ -81,4 +82,37 @@ export const testGene: RobotGene = {
     steeringMinRatio: 1,
     steeringMaxRatio: 1,
     rayCastDirectionOffsetRad: 30 * degToRad,
+}
+
+function randomBoolean(): boolean {
+    return Math.random() < 0.5;
+}
+
+function crossoverImp(a: number, b: number, rndValue: () => number): number {
+    // 突然変異
+    if (Math.random() < 0.05) {
+        return rndValue();
+    }
+
+    return lerpNumber(a, b, Math.random());
+}
+
+/**
+ * 交叉を行います。  
+ * 場合によっては min > max となりますが、RobotDriver側でclampしているので大丈夫の予定です。
+ * @param a 
+ * @param b 
+ * @returns 
+ */
+export function crossover(a: RobotGene, b: RobotGene): RobotGene {
+    return {
+        name: randomName(),
+        color: Math.random(),
+        rayCastMinDistance: crossoverImp(a.rayCastMinDistance, b.rayCastMinDistance, () => rayCastDistanceRange.rnd()),
+        rayCastMaxDistance: crossoverImp(a.rayCastMaxDistance, b.rayCastMaxDistance, () => rayCastDistanceRange.rnd()),
+        rayCastSpeedRatio: crossoverImp(a.rayCastSpeedRatio, b.rayCastSpeedRatio, () => rayCastSpeedRatioRange.rnd()),
+        steeringMinRatio: crossoverImp(a.steeringMinRatio, b.steeringMinRatio, () => steeringRatioRange.rnd()),
+        steeringMaxRatio: crossoverImp(a.steeringMaxRatio, b.steeringMaxRatio, () => steeringRatioRange.rnd()),
+        rayCastDirectionOffsetRad: crossoverImp(a.rayCastDirectionOffsetRad, b.rayCastDirectionOffsetRad, () => rayCastDirectionOffsetRadRange.rnd()),
+    };
 }
