@@ -29,6 +29,7 @@ export class GameWorld {
     get totalSec() { return this._totalSec; }
 
     step(deltaSec: number) {
+        deltaSec = Math.min(deltaSec, 1 / 30); // 30FPS以下にならないように
         this._totalSec += deltaSec;
         this.world.step(deltaSec);
     }

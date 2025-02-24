@@ -1,10 +1,11 @@
 
 import { Ticker } from "../../../common/animation/ticker";
 import { CourseView } from "../../../common/courses/courseView";
-import { createRandomGene, testGene } from "../../../common/drivers/robotGene";
+import { createRandomGene } from "../../../common/drivers/robotGene";
 import { GameWorld } from "../../../common/gameWorld";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
+import { LiveTimingView } from "./liveTimingView";
 import { Robot } from "./robot";
 
 const maxRobot = 20;
@@ -14,13 +15,14 @@ export class GeneticGameScene extends Scene {
     private readonly courseView = new CourseView();
     private robots: Robot[] = [];
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
-    //private readonly textEl = $(`<div class="lap-info">`);
+    private readonly liveTimingView = new LiveTimingView();
+    private readonly textEl = $(`<div class="info">`).append(this.liveTimingView.element);
 
     constructor(sceneController: SceneController) {
         super(sceneController, "genetic-game-scene");
         this.element.append(
             this.courseView.element,            
-            //this.textEl,
+            this.textEl,
             //$(`<div class="operation-info">`).text("[W]アクセル\n[A][D]ハンドル\n[S]ブレーキ\n[X]バック"),
         )
 
@@ -75,11 +77,12 @@ export class GeneticGameScene extends Scene {
         
         this.gameWorld.step(deltaSec);
         this.updateCarView();
-        //this.updateTextInfo();
+        this.updateTextInfo();
     }
 
-    /*private updateTextInfo() {
-        const lapTime = this.car.startSec == null ? formatLapTime() : formatLapTime(this.gameWorld.totalSec - this.car.startSec);
-        this.textEl.text(`Lap: ${lapTime}　　　Last: ${formatLapTime(this.car.lastLapTime)}　　　Best: ${formatLapTime(this.car.bestLapTime)}`);
-    }*/
+    private updateTextInfo() {
+        //let text = "";
+
+        this.liveTimingView.update(this.robots);
+    }
 }

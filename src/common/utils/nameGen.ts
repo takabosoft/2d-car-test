@@ -29,5 +29,5 @@ export function randomName() {
     ];
     var myouji = myoujiAry[Math.floor(Math.random() * myoujiAry.length)];
     var namae = namaeAry[Math.floor(Math.random() * namaeAry.length)];
-    return myouji + namae;
+    return myouji + " " + namae;
 }

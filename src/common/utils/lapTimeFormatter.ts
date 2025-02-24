@@ -1,5 +1,5 @@
 export function formatLapTime(sec?: number): string {
-    if (sec == null) { return "--'00.000"; }
+    if (sec == null) { return "--'--.---"; }
 
     // 分と秒を計算
     const minutes = Math.floor(sec / 60);
