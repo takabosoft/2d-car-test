@@ -33,7 +33,7 @@ export class TitleScene extends Scene {
             )
         );
 
-        this.element.find("#sound").on("change", e => {
+        this.element.find("#sound").prop("checked", soundManager.enable).on("change", e => {
             soundManager.enable = $(e.target).prop("checked") as boolean;
             if (soundManager.enable) {
                 soundManager.playButtonTap();
