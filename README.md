@@ -1,4 +1,4 @@
-# 2D物理エンジンを使ったトップダウンビューのレースゲーム実験
+# 2D物理エンジンレースカー進化シミュレーター
 
 DEMO：
-https://takabosoft.github.io/2d-car-test/
+https://takabosoft.github.io/2d-evolution-racer/

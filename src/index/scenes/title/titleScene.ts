@@ -25,7 +25,7 @@ export class TitleScene extends Scene {
                         人間が操作できるモードも用意いたしました。
                         
                         動作環境：Chrome/Edge + 大きめのモニター
-                        ソースコード：<a href="https://github.com/takabosoft/2d-car-test" target="_blank">https://github.com/takabosoft/2d-car-test</a>
+                        ソースコード：<a href="https://github.com/takabosoft/2d-evolution-racer" target="_blank">https://github.com/takabosoft/2d-evolution-racer</a>
                         2D物理エンジン：<a href="https://github.com/piqnt/planck.js">planck.js Copyright (c) Erin Catto, Ali Shakiba</a>
                     </div>
                     
