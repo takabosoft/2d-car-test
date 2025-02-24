@@ -12,7 +12,7 @@ export class Robot {
     constructor(world: World, gene: RobotGene) {
         this.robotDriver = new RobotDriver(gene);
         this.car = new Car(world, this.robotDriver.controlState);
-        this.carView = new CarView(this.robotDriver.gene.color, this.robotDriver.gene.name);
+        this.carView = new CarView(this.robotDriver.gene.color, this.robotDriver.gene.name, 0.05);
     }
 
     destroy() {

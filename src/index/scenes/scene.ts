@@ -22,6 +22,6 @@ export class Scene extends Component {
 
     }
 
-    onKeyDown(e: KeyboardEvent) {}
-    onKeyUp(e: KeyboardEvent) {}
+    onKeyDown(e: KeyboardEvent) { }
+    onKeyUp(e: KeyboardEvent) { }
 }

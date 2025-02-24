@@ -31,7 +31,7 @@ export class GeneticGameScene extends Scene {
         this.gameWorld = new GameWorld(courseId);
 
         this.element.append(
-            this.courseView.element,            
+            this.courseView.element,
             this.infoEl,
             $(`<button class="back-btn">`).text("戻る").on("click", () => this.sceneController.changeScene(new TitleScene(this.sceneController))),
         )
@@ -47,6 +47,7 @@ export class GeneticGameScene extends Scene {
 
     override onEndScene(): void {
         this.ticker.stop();
+        this.robots.forEach(r => r.destroy());
     }
 
     override onResize(): void {
@@ -68,7 +69,8 @@ export class GeneticGameScene extends Scene {
     }
 
     private updateCarView() {
-        this.robots.forEach(robot => robot.carView.update(robot.car, this.courseView.matrix));
+        const width = this.gameWorld.course.size.x;
+        this.robots.forEach(robot => robot.carView.update(robot.car, this.courseView.matrix, width));
     }
 
     private onTicker(deltaSec: number) {
@@ -76,7 +78,7 @@ export class GeneticGameScene extends Scene {
             robot.robotDriver.compute(robot.car);
             robot.car.update();
         });
-        
+
         this.gameWorld.step(deltaSec);
         this.updateCarView();
         this.liveTimingView.update(this.robots, this.gameWorld.totalSec);

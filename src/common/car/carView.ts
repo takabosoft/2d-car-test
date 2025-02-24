@@ -1,9 +1,10 @@
 import { Component } from "../components/component";
 import { pixelToSim } from "../env";
 import { Vec2 } from "../geometries/vec2";
+import { CarSound } from "../sounds/carSound";
+import { soundManager } from "../sounds/soundManager";
 import { spriteInfos, spriteSheet } from "../spriteSheet";
 import { radToDeg } from "../utils/mathUtils";
-import { randomName } from "../utils/nameGen";
 import { Car } from "./car";
 
 class TireView extends Component {
@@ -21,8 +22,13 @@ export class CarView extends Component {
 
     readonly nameView = $(`<div class="name-plate">`);
 
-    constructor(color?: number, private readonly name?: string) {
+    readonly sound?: CarSound;
+
+    constructor(color?: number, private readonly name?: string, soundGain = 0.2) {
         super();
+        if (soundManager.enable) {
+            this.sound = new CarSound(soundGain);
+        }
         this.element = $(`<div class="car">`);
 
         const initTire = (x: number, y: number) => {
@@ -51,7 +57,7 @@ export class CarView extends Component {
         }
     }
 
-    update(car: Car, courseMatrix: DOMMatrix) {
+    update(car: Car, courseMatrix: DOMMatrix, courseWidth: number) {
 
         // 位置角度
         const mat = new DOMMatrix();
@@ -73,10 +79,16 @@ export class CarView extends Component {
             const pos2 = courseMatrix.transformPoint(new DOMPoint(pos.x, pos.y + 8 * pixelToSim));
             this.nameView[0].style.transform = `translate(${pos2.x}px, ${pos2.y}px) translate(-50%, -20px)`;
         }
+
+        // 音
+        {
+            this.sound?.update((pos.x / courseWidth) * 2 - 1, 40 + car.body.getLinearVelocity().length() * 100);
+        }
     }
 
     destroy() {
         this.element.remove();
         this.nameView.remove();
+        this.sound?.destroy();
     }
 }

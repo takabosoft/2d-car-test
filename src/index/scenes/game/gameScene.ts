@@ -42,6 +42,7 @@ export class GameScene extends Scene {
 
     override onEndScene(): void {
         this.ticker.stop();
+        this.carView.destroy();
     }
 
     override onResize(): void {
@@ -63,7 +64,7 @@ export class GameScene extends Scene {
     }
 
     private updateCarView() {
-        this.carView.update(this.car, this.courseView.matrix);
+        this.carView.update(this.car, this.courseView.matrix, this.gameWorld.course.size.x);
     }
 
     private onTicker(deltaSec: number) {
