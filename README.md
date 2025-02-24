@@ -27,8 +27,6 @@ npx webpack -w
 npx live-server docs
 ```
 
-なおIPでアクセスする場合（LAN内の他の端末で試すなどする場合）はHTTPSで接続しないと`audioWorklet.addModule`が動作しません。
-
 SCSSは拡張機能で[Live Sass Compiler](https://marketplace.visualstudio.com/items?itemName=glenn2223.live-sass)を利用します。
 
 #### リリース時
