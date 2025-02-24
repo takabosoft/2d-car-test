@@ -3,6 +3,7 @@ import { pixelToSim } from "../env";
 import { Vec2 } from "../geometries/vec2";
 import { spriteInfos, spriteSheet } from "../spriteSheet";
 import { radToDeg } from "../utils/mathUtils";
+import { randomName } from "../utils/nameGen";
 import { Car } from "./car";
 
 class TireView extends Component {
@@ -18,7 +19,9 @@ export class CarView extends Component {
     readonly rlTire: TireView;
     readonly rrTire: TireView;
 
-    constructor(isRandomColor = false) {
+    readonly nameView = $(`<div class="name-plate">`);
+
+    constructor(color?: number, private readonly name?: string) {
         super();
         this.element = $(`<div class="car">`);
 
@@ -38,10 +41,14 @@ export class CarView extends Component {
         this.rrTire = initTire(11, 10);
 
         const body = $(spriteSheet.crop(spriteInfos.car).canvas).addClass("body");
-        if (isRandomColor) {
-            body[0].style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+        if (color != null) {
+            body[0].style.filter = `hue-rotate(${color * 360}deg)`;
         }
         this.element.append(body);
+
+        if (name != null) {
+            this.nameView.text(name);
+        }
     }
 
     update(car: Car, courseMatrix: DOMMatrix) {
@@ -60,5 +67,11 @@ export class CarView extends Component {
         // 前輪
         const angle = car.getTireAngle * radToDeg;
         this.flTire.element[0].style.transform = this.frTire.element[0].style.transform = `rotate(${-angle}deg)`;
+
+        // 名前
+        if (this.name != null) {
+            const pos2 = courseMatrix.transformPoint(new DOMPoint(pos.x, pos.y + 8 * pixelToSim));
+            this.nameView[0].style.transform = `translate(${pos2.x}px, ${pos2.y}px) translate(-50%, -20px)`;
+        }
     }
 }

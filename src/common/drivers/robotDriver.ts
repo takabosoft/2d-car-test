@@ -3,55 +3,14 @@ import { Car } from "../car/car";
 import { ControlState } from "../car/controlState";
 import { clamp, degToRad } from "../utils/mathUtils";
 import { lerpNumber } from "../animation/easing";
-
-
-class GeneRange {
-    constructor(readonly min: number, readonly max: number) {
-
-    }
-
-    clamp(value: number, minOverride?: number) {
-        return clamp(value, minOverride ?? this.min, this.max);
-    }
-}
-
-const rayCastDistanceRange = new GeneRange(0.001, 10);
-const rayCastSpeedRatioRange = new GeneRange(0, 1);
-const steeringRatioRange = new GeneRange(0.001, 1);
-const rayCastDirectionOffsetRadRange = new GeneRange(0.001, 60 * degToRad);
-
-export interface RobotGene {
-    /** 検知する障害物の最小距離 */
-    readonly rayCastMinDistance: number;
-    /** 検知する障害物の最大距離 */
-    readonly rayCastMaxDistance: number;
-    /** 検知する障害物の距離に移動速度がどれだけ影響を与えるか */
-    readonly rayCastSpeedRatio: number;
-    /** 検知した障害物が最小距離に対応するハンドル舵角の最小 */
-    readonly steeringMinRatio: number;
-    /** 検知した障害物が最大距離に対応するハンドル舵角の最大 */
-    readonly steeringMaxRatio: number;
-    /** 左右どちらに曲がるかの判定に使うレイキャストの角度オフセット */
-    readonly rayCastDirectionOffsetRad: number;
-}
+import { clampRobotGene, RobotGene } from "./robotGene";
 
 export class RobotDriver {
     readonly controlState = new ControlState();
     readonly gene: RobotGene;
 
     constructor(gene: RobotGene) {
-
-        const rayCastMinDistance = rayCastDistanceRange.clamp(gene.rayCastMinDistance);
-        const steeringMinRatio = steeringRatioRange.clamp(gene.steeringMinRatio);
-
-        this.gene = {
-            rayCastMinDistance,
-            rayCastMaxDistance: rayCastDistanceRange.clamp(gene.rayCastMaxDistance, rayCastMinDistance),
-            rayCastSpeedRatio: rayCastSpeedRatioRange.clamp(gene.rayCastSpeedRatio),
-            steeringMinRatio,
-            steeringMaxRatio: steeringRatioRange.clamp(gene.steeringMaxRatio, steeringMinRatio),
-            rayCastDirectionOffsetRad: rayCastDirectionOffsetRadRange.clamp(gene.rayCastDirectionOffsetRad),
-        };
+        this.gene = clampRobotGene(gene);
     }
 
     compute(car: Car) {
@@ -69,7 +28,7 @@ export class RobotDriver {
 
         const rayFront = car.rayCast(rayCastMax, 0);
         if (rayFront == null) { return; }
-        const rayFrontRatio = clamp((rayCastMax - rayCastMin) == 0 ? 1 : (rayFront - rayCastMin) / (rayCastMax - rayCastMin), 0, 1);
+        const rayFrontRatio = clamp((rayCastMax - rayCastMin) == 0 ? 0 : (rayFront - rayCastMin) / (rayCastMax - rayCastMin), 0, 1);
 
         // どっちに曲がるか
         let isLeft: boolean;
@@ -84,6 +43,6 @@ export class RobotDriver {
         } else {
             isLeft = rayLeft! < rayRight!;
         }
-        this.controlState.steeringRatio = lerpNumber(this.gene.steeringMinRatio, this.gene.steeringMaxRatio, rayFrontRatio) * (isLeft ? -1 : 1);
+        this.controlState.steeringRatio = lerpNumber(this.gene.steeringMaxRatio, this.gene.steeringMinRatio, rayFrontRatio) * (isLeft ? -1 : 1);
     }
 } 

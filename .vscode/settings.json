@@ -11,6 +11,7 @@
     ],
     "scss.format.spaceAroundSelectorSeparator": true,
     "cSpell.words": [
+        "lerp"
     ],
     "files.eol": "\n",
     "explorer.compactFolders": false,

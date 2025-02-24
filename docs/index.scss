@@ -96,3 +96,12 @@ body {
         position: absolute;
     }
 }
+
+.name-plate {
+    position: absolute;
+    will-change: transform;
+    font-size: 12px;
+    color: white;
+    text-shadow: 0 2px 0 black;
+    width: fit-content;
+}

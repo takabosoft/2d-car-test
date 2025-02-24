@@ -1,41 +1,39 @@
 
 import { Ticker } from "../../../common/animation/ticker";
-import { Car } from "../../../common/car/car";
-import { CarView } from "../../../common/car/carView";
 import { CourseView } from "../../../common/courses/courseView";
-import { RobotDriver } from "../../../common/drivers/robotDriver";
+import { createRandomGene, testGene } from "../../../common/drivers/robotGene";
 import { GameWorld } from "../../../common/gameWorld";
-import { degToRad } from "../../../common/utils/mathUtils";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
+import { Robot } from "./robot";
+
+const maxRobot = 20;
 
 export class GeneticGameScene extends Scene {
     private readonly gameWorld = new GameWorld()
     private readonly courseView = new CourseView();
-    //private readonly humanDriver = new HumanDriver();
-
-    private readonly robotDriver = new RobotDriver({
-        rayCastMinDistance: 0.2,
-        rayCastMaxDistance: 0.7,
-        rayCastSpeedRatio: 0.5,
-        steeringMinRatio: 0,
-        steeringMaxRatio: 1,
-        rayCastDirectionOffsetRad: 30 * degToRad,
-    });
-    private readonly car = new Car(this.gameWorld.world, this.robotDriver.controlState);
-    private readonly carView = new CarView(true);
+    private robots: Robot[] = [];
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
     //private readonly textEl = $(`<div class="lap-info">`);
 
     constructor(sceneController: SceneController) {
         super(sceneController, "genetic-game-scene");
         this.element.append(
-            this.courseView.element,
-            this.carView.element,
+            this.courseView.element,            
             //this.textEl,
             //$(`<div class="operation-info">`).text("[W]アクセル\n[A][D]ハンドル\n[S]ブレーキ\n[X]バック"),
         )
-        this.car.reset(this.gameWorld.course.startPos, Math.PI / 2);
+
+        for (let i = 0; i < maxRobot; i++) {
+            const robot = new Robot(this.gameWorld.world, createRandomGene());
+            this.element.append(
+                robot.carView.element,
+                robot.carView.nameView,
+            );
+            robot.car.reset(this.gameWorld.course.startPos, Math.PI / 2);
+            this.robots.push(robot);
+        }
+
         this.layout();
     }
 
@@ -66,12 +64,15 @@ export class GeneticGameScene extends Scene {
     }
 
     private updateCarView() {
-        this.carView.update(this.car, this.courseView.matrix);
+        this.robots.forEach(robot => robot.carView.update(robot.car, this.courseView.matrix));
     }
 
     private onTicker(deltaSec: number) {
-        this.robotDriver.compute(this.car);
-        this.car.update();
+        this.robots.forEach(robot => {
+            robot.robotDriver.compute(robot.car);
+            robot.car.update();
+        });
+        
         this.gameWorld.step(deltaSec);
         this.updateCarView();
         //this.updateTextInfo();
