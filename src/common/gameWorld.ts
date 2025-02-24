@@ -1,15 +1,15 @@
 import { Vec2, World } from "planck";
 import { Car } from "./car/car";
 import { CheckPoint } from "./courses/checkPoint";
-import { Course, TestCourse } from "./courses/course";
+import { Course, CourseId, BasicCourse } from "./courses/course";
 
 export class GameWorld {
     readonly world = new World({ gravity: new Vec2(0, 0) });
     readonly course: Course;
     private _totalSec = 0;
 
-    constructor() {
-        this.course = new TestCourse(this.world); // ステージはIDとかで切り替えるしかない
+    constructor(courseId: CourseId) {
+        this.course = Course.fromId(courseId, this.world);
 
         this.world.on("begin-contact", e => {
             const aUserData = e.getFixtureA().getUserData();

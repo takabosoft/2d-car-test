@@ -1,17 +1,19 @@
 
 import { Ticker } from "../../../common/animation/ticker";
+import { CourseId } from "../../../common/courses/course";
 import { CourseView } from "../../../common/courses/courseView";
 import { createRandomGene, crossover, RobotGene } from "../../../common/drivers/robotGene";
 import { GameWorld } from "../../../common/gameWorld";
 import { Scene } from "../scene";
 import { SceneController } from "../sceneController";
+import { TitleScene } from "../title/titleScene";
 import { LiveTimingView } from "./liveTimingView";
 import { Robot } from "./robot";
 
 const maxRobot = 20;
 
 export class GeneticGameScene extends Scene {
-    private readonly gameWorld = new GameWorld()
+    private readonly gameWorld: GameWorld;
     private readonly courseView = new CourseView();
     private robots: Robot[] = [];
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
@@ -19,16 +21,19 @@ export class GeneticGameScene extends Scene {
     private readonly textEl = $(`<div>`);
     private readonly infoEl = $(`<div class="info">`).append(
         this.textEl,
-        this.liveTimingView.element
+        this.liveTimingView.element,
     );
     private generation = 1;
 
-    constructor(sceneController: SceneController) {
+    constructor(sceneController: SceneController, courseId: CourseId) {
         super(sceneController, "genetic-game-scene");
+
+        this.gameWorld = new GameWorld(courseId);
+
         this.element.append(
             this.courseView.element,            
             this.infoEl,
-            //$(`<div class="operation-info">`).text("[W]アクセル\n[A][D]ハンドル\n[S]ブレーキ\n[X]バック"),
+            $(`<button class="back-btn">`).text("戻る").on("click", () => this.sceneController.changeScene(new TitleScene(this.sceneController))),
         )
 
         this.createRobots();
@@ -125,5 +130,6 @@ export class GeneticGameScene extends Scene {
             robot.car.reset(this.gameWorld.course.startPos, Math.PI / 2);
             this.robots.push(robot);
         }
+        this.updateCarView();
     }
 }

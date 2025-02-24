@@ -7,22 +7,29 @@ import { Ticker } from "../../../common/animation/ticker";
 import { CourseView } from "../../../common/courses/courseView";
 import { GameWorld } from "../../../common/gameWorld";
 import { formatLapTime } from "../../../common/utils/lapTimeFormatter";
+import { CourseId } from "../../../common/courses/course";
+import { TitleScene } from "../title/titleScene";
 
 export class GameScene extends Scene {
-    private readonly gameWorld = new GameWorld()
+    private readonly gameWorld: GameWorld;
     private readonly courseView = new CourseView();
     private readonly humanDriver = new HumanDriver();
-    private readonly car = new Car(this.gameWorld.world, this.humanDriver.controlState);
+    private readonly car: Car;
     private readonly carView = new CarView();
     private readonly ticker = new Ticker(frameStep => this.onTicker(frameStep));
     private readonly textEl = $(`<div class="lap-info">`);
 
-    constructor(sceneController: SceneController) {
+    constructor(sceneController: SceneController, courseId: CourseId) {
         super(sceneController, "game-scene");
+
+        this.gameWorld = new GameWorld(courseId);
+        this.car = new Car(this.gameWorld.world, this.humanDriver.controlState);
+
         this.element.append(
             this.courseView.element,
             this.carView.element,
             this.textEl,
+            $(`<button class="back-btn">`).text("戻る").on("click", () => this.sceneController.changeScene(new TitleScene(this.sceneController))),
             $(`<div class="operation-info">`).text("[W]アクセル\n[A][D]ハンドル\n[S]ブレーキ\n[X]バック"),
         )
         this.car.reset(this.gameWorld.course.startPos, Math.PI / 2);

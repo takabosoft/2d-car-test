@@ -7,9 +7,8 @@
  */
 
 import { SceneController } from "./scenes/sceneController";
-import { GameScene } from "./scenes/game/gameScene";
 import { spriteSheet } from "../common/spriteSheet";
-import { GeneticGameScene } from "./scenes/genetic_game/geneticGameScene";
+import { TitleScene } from "./scenes/title/titleScene";
 
 $(() => new PageController().start());
 
@@ -19,6 +18,6 @@ class PageController {
     async start() {
         $(document.body).append(this.sceneController.element);
         await spriteSheet.load();
-        this.sceneController.changeScene(new GeneticGameScene(this.sceneController));
+        this.sceneController.changeScene(new TitleScene(this.sceneController));
     }
 }

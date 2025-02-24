@@ -6,7 +6,13 @@ export type Polygon = [number, number][];
 
 type CheckPointRaw = [Vec2, Vec2];
 
+export const enum CourseId {
+    Basic,
+}
+
 export interface CourseInfo {
+    readonly courseId: CourseId;
+    readonly name: string;
     readonly size: Vec2;
     /** 壁 */
     readonly outerWalls: Polygon[];
@@ -17,22 +23,27 @@ export interface CourseInfo {
 }
 
 export class Course {
-    constructor(world: World, readonly info: CourseInfo,) {
-        info.outerWalls.forEach(chainPath => {
-            // 物理エンジンはY軸が上向きなので変換します。
-            const chain = new Chain(chainPath.map(p => this.convertPosXY(p[0], p[1])));
-            const boundaryChain = world.createBody();
-            boundaryChain.createFixture(chain, {
-                friction: 1.0,
-                filterCategoryBits: FilterCategory.Wall,
-            });
-        });
+    constructor(world: World | undefined, readonly info: CourseInfo,) {
 
-        this.checkPoints.forEach((cp, idx) => {
-            new CheckPoint(world, cp, idx);
-        });
+        if (world != null) {
+            info.outerWalls.forEach(chainPath => {
+                // 物理エンジンはY軸が上向きなので変換します。
+                const chain = new Chain(chainPath.map(p => this.convertPosXY(p[0], p[1])));
+                const boundaryChain = world.createBody();
+                boundaryChain.createFixture(chain, {
+                    friction: 1.0,
+                    filterCategoryBits: FilterCategory.Wall,
+                });
+            });
+
+            this.checkPoints.forEach((cp, idx) => {
+                new CheckPoint(world, cp, idx);
+            });
+        }
     }
 
+    get name() { return this.info.name; }
+    get courseId() { return this.info.courseId; }
     get size() { return this.info.size.clone().mul(pixelToSim); }
     get startPos() { return this.convertPosVec2(this.info.startPos); }
 
@@ -47,11 +58,21 @@ export class Course {
     private convertPosVec2(v: Vec2): Vec2 {
         return new Vec2(v.x, this.info.size.y - v.y).mul(pixelToSim);
     }
+
+    static fromId(id: CourseId, world: World | undefined): Course {
+        switch (id) {
+            case CourseId.Basic:
+                return new BasicCourse(world);
+        }
+        return new BasicCourse(world);
+    }
 }
 
-export class TestCourse extends Course {
-    constructor(world: World) {
+export class BasicCourse extends Course {
+    constructor(world: World | undefined) {
         super(world, {
+            courseId: CourseId.Basic,
+            name: "普通のコース",
             size: new Vec2(800, 480),
             outerWalls: [
                 [[472, 32], [486, 35], [495, 35], [519, 40], [528, 40], [547, 44], [554, 47], [558, 47], [568, 51], [572, 51], [592, 59], [638, 84], [674, 110], [691, 127], [713, 157], [726, 184], [734, 209], [735, 214], [735, 282], [733, 288], [732, 301], [730, 305], [729, 324], [725, 347], [723, 351], [722, 361], [713, 389], [693, 425], [675, 445], [654, 461], [638, 468], [629, 470], [590, 470], [589, 469], [580, 469], [574, 467], [556, 465], [529, 456], [504, 444], [482, 426], [454, 390], [443, 369], [434, 347], [431, 343], [406, 329], [400, 324], [370, 308], [342, 308], [326, 313], [205, 313], [186, 309], [175, 309], [169, 307], [151, 305], [124, 296], [82, 267], [66, 245], [54, 219], [51, 208], [51, 174], [55, 153], [62, 138], [66, 125], [77, 104], [95, 85], [110, 73], [136, 59], [151, 54], [155, 54], [177, 48], [194, 48], [209, 44], [217, 44], [226, 41], [269, 39], [280, 36], [327, 35], [342, 32], [396, 32], [397, 31], [472, 32]],

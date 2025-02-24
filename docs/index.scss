@@ -129,4 +129,151 @@ body {
             gap: 1px 4px;
         }
     }
+
+    
+}
+
+.back-btn {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    padding: 8px;
+    color: white;
+    appearance: none;
+    z-index: 20;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:hover {
+        background: rgba(0.3, 0.3, 0.3, 0.7);
+    }
+
+    &:active {
+        color: gray;
+    }
+}
+
+.title-scene {
+    background: linear-gradient(220.55deg, #FFE70B 0%, #27B643 100%);
+
+    > .content {
+        position: absolute;
+        inset: 0;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+        color: black;
+        
+
+        > * {
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            color: white;
+            text-shadow: 0 1px 4px black;
+        }
+
+        .copyright {
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 1px 4px black;
+            margin-bottom: 64px;
+
+            a {
+                color: inherit;
+            }
+        }
+
+        .course-panel {
+            display: flex;
+            align-items: center;
+            margin-bottom: 48px;
+
+            > * {
+                position: relative;
+            }
+
+            canvas {
+                border: 3px solid white;
+                border-radius: 4px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+                margin-right: 16px;
+            }
+
+            .info {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+
+                > .title {
+                    font-size: 24px;
+                    color: black;
+                    font-weight: 600;
+                    margin-bottom: 32px;
+                }
+
+                > button + button {
+                    margin-top: 16px;
+                }
+            }
+        }
+    }
+
+    .description {
+        margin: 32px;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        color: white;
+        text-shadow: 0 1px 2px black;
+        font-weight: 400;
+        white-space: pre-line;
+        word-break: break-word;
+        line-height: 1.4;
+
+        a {
+            color: inherit;
+        }
+    }
+
+    .play-button {
+        background: rgb(185, 12, 0);
+        border: 2px solid white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px black;
+        padding: 10px;
+        color: white;
+        font-weight: 600;
+        text-shadow: 0 2px 4px black;
+        appearance: none;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 20px;
+
+        &:focus {
+            outline: none;
+        }
+
+        &:hover(:not:active) {
+            filter: brightness(1.5);
+        }
+
+        &:active {
+            filter: brightness(0.8);
+            box-shadow: 0 1px 2px black;
+            transform: translateY(1px);
+        }
+    }
 }

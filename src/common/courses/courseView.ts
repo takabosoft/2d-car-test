@@ -125,5 +125,18 @@ export class CourseView extends Component {
         ctx.lineWidth = 0.02;
         ctx.strokeStyle = "rgb(50, 50, 50)";
         ctx.stroke(path);
+
+        // チェックポイントを見たい
+        if (false) {
+            const checkPoints = course.checkPoints;
+            for (let i = 1; i < checkPoints.length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(checkPoints[i][0].x, checkPoints[i][0].y);
+                ctx.lineTo(checkPoints[i][1].x, checkPoints[i][1].y);
+                ctx.strokeStyle = "red";
+                ctx.lineWidth = 0.01;
+                ctx.stroke();
+            }
+        }
     }
 }
