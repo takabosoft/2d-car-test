@@ -41,7 +41,7 @@ export class RobotDriver {
         } else if (rayLeft != null && rayRight == null) {
             isLeft = false;
         } else {
-            isLeft = rayLeft! < rayRight!;
+            isLeft = rayLeft! > rayRight!;
         }
         this.controlState.steeringRatio = lerpNumber(this.gene.steeringMaxRatio, this.gene.steeringMinRatio, rayFrontRatio) * (isLeft ? -1 : 1);
     }
